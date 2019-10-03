@@ -13,6 +13,10 @@ type
     BitBtn1: TBitBtn;
     BitBtn2: TBitBtn;
     m: TMemo;
+    BitBtn3: TBitBtn;
+    BitBtn4: TBitBtn;
+    BitBtn5: TBitBtn;
+    BitBtn6: TBitBtn;
     procedure BitBtn2Click(Sender: TObject);
   private
     { Private declarations }
@@ -36,9 +40,7 @@ begin
   inherited;
   SZURES.Active:=False;
   SZURES.SQL.Text:=
-    'Select b.SZERVEZET_ID, b.JURTA_KOD, b.SZERVEZET_NEV, a.* '+
-    'From JurtaTV_teszt.dbo.Nberlok a left join TIR_teszt.dbo.SZERVEZET b on '+
-    'a.ADOSZAM=b.ADOSZAM Where a.AKTIV=1 Order By b.SZERVEZET_ID ';
+    'Select a.* From JurtaTV_teszt.dbo.Nberlok a Where a.AKTIV=1 Order By a.NEV ';
   SZURES.Active:=True;
   SZURES.First;
   while not SZURES.Eof do
@@ -304,14 +306,11 @@ begin
           ]);
         end;
       end;
-    end
-    //Benne van a TIR-ben
-    else
-    begin
-
     end;
     SZURES.Next;
   end;
+  //Csarnok bérlõk feldolgozása
+
 end;
 
 end.

@@ -40,7 +40,8 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     end
   end
   inherited dbg_lista: TDBGrid
-    Width = 802
+    Left = 168
+    Width = 642
     Height = 279
   end
   inherited bb_uj: TBitBtn
@@ -73,13 +74,49 @@ inherited f_AdatMigracio: Tf_AdatMigracio
   end
   object m: TMemo [6]
     Left = 168
-    Top = 15
+    Top = 8
     Width = 642
-    Height = 150
+    Height = 157
     Anchors = [akLeft, akTop, akRight]
     ScrollBars = ssBoth
     TabOrder = 6
     WordWrap = False
+  end
+  object BitBtn3: TBitBtn [7]
+    Left = 16
+    Top = 75
+    Width = 133
+    Height = 25
+    Caption = 'Csarnok b'#233'rl'#337'k'
+    TabOrder = 7
+  end
+  object BitBtn4: TBitBtn [8]
+    Left = 16
+    Top = 106
+    Width = 133
+    Height = 25
+    Caption = 'Lak'#225'sok'
+    TabOrder = 8
+  end
+  object BitBtn5: TBitBtn [9]
+    Left = 16
+    Top = 137
+    Width = 133
+    Height = 25
+    Caption = 'Helyis'#233'gek '#233's csarnok'
+    TabOrder = 9
+  end
+  object BitBtn6: TBitBtn [10]
+    Left = 16
+    Top = 168
+    Width = 133
+    Height = 25
+    Caption = 'Szerz'#337'd'#233'sek'
+    TabOrder = 10
+  end
+  inherited SZURESds: TDataSource
+    Left = 332
+    Top = 56
   end
   inherited SZURES: TADOQuery
     Connection = nil
