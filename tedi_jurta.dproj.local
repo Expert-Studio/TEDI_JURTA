@@ -1,14 +1,14 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>2019/09/30 09:06:35.000.947,C:\TEDI_JURTA\tedi_jurta.dproj=C:\TEDI_JURTA\tedi.dproj</Transaction>
+    <Transaction>2019/09/30 09:06:35.000.947,C:\TEDI_JURTA\tedi.dproj=C:\TEDI_JURTA\tedi_jurta.dproj</Transaction>
     <Transaction>2019/09/30 09:06:36.000.498,c:\tedi_jurta\modelsupport_tedi\default.txapackage=</Transaction>
     <Transaction>2019/09/30 09:06:37.000.746,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\default.txaPackage</Transaction>
     <Transaction>2019/09/30 09:06:40.000.198,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\default.txvpck</Transaction>
     <Transaction>2019/09/30 09:06:41.000.022,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BefizetesAdat_Unit\default.txvpck</Transaction>
     <Transaction>2019/09/30 09:06:42.000.132,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BerloKeres_Unit\default.txvpck</Transaction>
-    <Transaction>2019/09/30 09:06:43.000.077,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzerzodesKeres_Unit\default.txvpck</Transaction>
     <Transaction>2019/09/30 09:06:43.000.930,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_PenztarBefizetes_Unit\default.txvpck</Transaction>
+    <Transaction>2019/09/30 09:06:43.000.077,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzerzodesKeres_Unit\default.txvpck</Transaction>
     <Transaction>2019/09/30 09:06:44.000.739,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BerlemenyKereses_Unit\default.txvpck</Transaction>
     <Transaction>2019/09/30 09:06:45.000.574,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_AdatMigracio_Unit\default.txvpck</Transaction>
     <Transaction>2019/09/30 09:06:46.000.472,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BerloAdatSzemely_Unit\default.txvpck</Transaction>
