@@ -91,7 +91,7 @@ const
     '30 = A DDE tranzakció nem hajtható végre, mert a többi DDE tranzakciók feldolgozása folyt.',
     '31 = nincs társított alkalmazás az adott fájl kiterjesztése.',
     '32 = Windows 95 esetében: A megadott DLL nem található.');
-  RegistryKulcs = '\Software\Expert Stúdió\TEDI\';
+  RegistryKulcs = '\Software\Expert Stúdió\TEDI_JURTA\';
 
   KettoHatvany: Array [0 .. 15] Of Integer = (1, 2, 4, 8, 16, 32, 64, 128, 256,
     512, 1024, 2048, 4096, 8192, 16384, 32768);

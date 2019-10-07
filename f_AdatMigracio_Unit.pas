@@ -21,6 +21,7 @@ type
     procedure BitBtn2Click(Sender: TObject);
     procedure BitBtn7Click(Sender: TObject);
     procedure BitBtn3Click(Sender: TObject);
+    procedure BitBtn5Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -703,6 +704,49 @@ begin
           end;
         end;
       end;
+    end;
+    SZURES.Next;
+  end;
+end;
+
+procedure Tf_AdatMigracio.BitBtn5Click(Sender: TObject);
+begin
+  inherited;
+  //Feltételezzük, hogy minden helyiség kód szerepel a TIR-ben egyszer
+  SZURES.Active:=False;
+  SZURES.SQL.Text:=
+    'Select a.* From JurtaTV_teszt.dbo.Nemlakas a Where a.AKTIV=1 Order By a.CIM ';
+  SZURES.Active:=True;
+  SZURES.First;
+  while not SZURES.Eof do
+  begin
+    //HRSZ
+    LISTA.SQL.Text:='Select x.nem_lakas_id, x.osszes_terulet, '+
+    '(Select y.helyrajziszam From helyrajzi_szamok y Where y.hrsz_id=x.hrsz_id) as hrsz '+
+    'From B_NEM_LAKAS x Where x.JURTA_KOD='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
+    LISTA.Active:=True;
+    if LISTA.FieldByName('hrsz').AsString<>SZURES.FieldByName('hrsz').AsString+'/'+SZURES.FieldByName('albetet').AsString then
+       m.Lines.Add('HRSZ hiba: '+SZURES.FieldByName('KOD').AsString+' ('+SZURES.FieldByName('hrsz').AsString+'/'+SZURES.FieldByName('albetet').AsString+') - '+
+       LISTA.FieldByName('nem_lakas_id').AsString+' ('+LISTA.FieldByName('hrsz').AsString+')');
+    //terület
+    if LISTA.FieldByName('osszes_terulet').AsString<>SZURES.FieldByName('alapterulet').AsString then
+       m.Lines.Add('Terület hiba: '+SZURES.FieldByName('KOD').AsString+' ('+SZURES.FieldByName('alapterulet').AsString+') - '+
+       LISTA.FieldByName('nem_lakas_id').AsString+' ('+LISTA.FieldByName('osszes_terulet').AsString+')');
+    //megjegyzés
+    if SZURES.FieldByName('MEGJEGYZES').AsString<>'' then
+       Beszuras('MEGJEGYZES',[
+        'NEM_LAKAS_ID='+LISTA.FieldByName('nem_lakas_id').AsString,
+        'FELH_ID='+FELHASZNALO_ID,
+        'MEGJEGYZES='+SZURES.FieldByName('MEGJEGYZES').AsString,
+        'MEGJEGYZES_DATUM='+'20191231'
+       ],False);
+    if LISTA.FieldByName('nem_lakas_id').AsString<>'' then
+    begin
+      if SZURES.FieldByName('VIZMERO').AsString='1' then
+         Modositas('B_NEM_LAKAS',[
+          'B_VIZ=1',
+          'B_VIZ_DATUMA='+StrDate(SZURES.FieldByName('VIZORADATUM').AsString)
+         ],'NEM_LAKAS_ID='+LISTA.FieldByName('nem_lakas_id').AsString);
     end;
     SZURES.Next;
   end;

@@ -545,7 +545,8 @@ object f_Foablak: Tf_Foablak
     object Brlemnyek1: TMenuItem
       Caption = 'B'#233'rlem'#233'nyek'
       object Laksok1: TMenuItem
-        Caption = 'Lak'#225'sok'
+        Caption = 'Keres'#233's'
+        OnClick = Laksok1Click
       end
       object Helyisgek1: TMenuItem
         Caption = 'Helyis'#233'gek'

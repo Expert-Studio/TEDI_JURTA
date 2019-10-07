@@ -190,6 +190,14 @@
             <Form>f_EleresAdat</Form>
             <FormType>dfm</FormType>
         </DCCReference>
+        <DCCReference Include="f_BerlemenyKereses_Unit.pas">
+            <Form>f_BerlemenyKereses</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
+        <DCCReference Include="f_BerlemenyAdat_Unit.pas">
+            <Form>f_BerlemenyAdat</Form>
+            <FormType>dfm</FormType>
+        </DCCReference>
         <BuildConfiguration Include="Release">
             <Key>Cfg_2</Key>
             <CfgParent>Base</CfgParent>
@@ -217,6 +225,12 @@
             </Delphi.Personality>
             <Deployment Version="3">
                 <DeployFile LocalName="Win32\Release\tedi_jurta.exe" Configuration="Release" Class="ProjectOutput">
+                    <Platform Name="Win32">
+                        <RemoteName>tedi_jurta.exe</RemoteName>
+                        <Overwrite>true</Overwrite>
+                    </Platform>
+                </DeployFile>
+                <DeployFile LocalName="Win32\Debug\tedi_jurta.exe" Configuration="Debug" Class="ProjectOutput">
                     <Platform Name="Win32">
                         <RemoteName>tedi_jurta.exe</RemoteName>
                         <Overwrite>true</Overwrite>

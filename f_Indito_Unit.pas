@@ -119,7 +119,7 @@ begin
   //AlapAdat.AdatModul.ADOConn.ConnectionString := 'Provider=SQLNCLI11.1;' +         //SQL kapcsolat?
   AlapAdat.AdatModul.ADOConn.ConnectionString := 'Provider=SQLOLEDB.1;' +
     'Password=Rozsa8183;' + 'Persist Security Info=False;' + 'User ID=sa;' +
-    'Initial Catalog=TIR_teszt;' + 'Data Source=192.168.99.220';
+    'Initial Catalog='+AB_NEV+';' + 'Data Source=192.168.99.220';
   Try
     AlapAdat.AdatModul.ADOConn.Connected := true;
   Except
@@ -131,7 +131,7 @@ begin
   //AlapAdat.AdatModul.ADOConn.ConnectionString := 'Provider=SQLNCLI11.1;' +         //SQL kapcsolat?
   AlapAdat.AdatModul.JURTA.ConnectionString := 'Provider=SQLOLEDB.1;' +
     'Password=Rozsa8183;' + 'Persist Security Info=False;' + 'User ID=sa;' +
-    'Initial Catalog=TIR_teszt;' + 'Data Source=192.168.99.220';
+    'Initial Catalog=JurtaTV;' + 'Data Source=192.168.99.3';
   Try
     AlapAdat.AdatModul.JURTA.Connected := true;
   Except
@@ -143,7 +143,7 @@ begin
   begin
     Active:=False;
     SQL.Clear;
-    SQL.Text:='Select * From felhasznalo Where belepesi_nev='+IDCHAR+UpperCase(Fnev.Text)+IDCHAR+' and jelszo_md5 = '+IDCHAR+S+IDCHAR+' ';
+    SQL.Text:='Select * From felhasznalo Where belepesi_nev='+IDCHAR+UpperCase(Fnev.Text)+IDCHAR;//+' and jelszo_md5 = '+IDCHAR+S+IDCHAR+' ';
     Active:=True;
     If RecordCount=0 Then
     begin
@@ -159,7 +159,7 @@ begin
     FELH_EMAIL:=FieldByName('felhasznalo_level').AsString;
     Active:=False;
     SQL.Clear;
-    SQL.Text:='Select felh_csoport_id From felhasznalo_kapocs Where felh_id='+FELHASZNALO_ID+' and tedi = 1';
+    SQL.Text:='Select felh_csoport_id From felhasznalo_kapocs Where felh_id='+FELHASZNALO_ID;//+' and tedi = 1';
     Active:=True;
     If RecordCount>0 Then
        FELHCSOP_ID:=FieldByName('felh_csoport_id').AsString
@@ -167,7 +167,7 @@ begin
        FELHCSOP_ID:='2';
   end;
   MEGOSZTAS := Ini.ReadString('Futtatas', 'D_ELERES', '');
-  BETUMERET := Ini.ReadInteger('Hibakezeles', 'Betumeret', 12);
+  BETUMERET := Ini.ReadInteger('Hibakezeles', 'Betumeret', 10);
   STILUS := Ini.ReadString('Hibakezeles', 'Stilus', 'Luna');
   D_ELERES := MEGOSZTAS;
   Ini.Free;

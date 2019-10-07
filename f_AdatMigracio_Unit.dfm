@@ -117,6 +117,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Anchors = [akLeft, akTop, akRight]
     Caption = 'Helyis'#233'gek '#233's csarnok'
     TabOrder = 9
+    OnClick = BitBtn5Click
     ExplicitWidth = 133
   end
   object BitBtn6: TBitBtn [10]
@@ -145,6 +146,6 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Top = 56
   end
   inherited SZURES: TADOQuery
-    Connection = nil
+    Connection = AdatModul.JURTA
   end
 end

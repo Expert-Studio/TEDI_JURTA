@@ -6,7 +6,7 @@ uses
   Winapi.Windows, Winapi.Messages, System.SysUtils, System.Variants,
   System.Classes, Vcl.Graphics,
   Vcl.Controls, Vcl.Forms, Vcl.Dialogs, AlapSzures_Unit, Data.DB, Vcl.StdCtrls,
-  Alapfuggveny,
+  Alapfuggveny, f_GridMezok_Unit,
   Vcl.ExtCtrls, Data.Win.ADODB, Vcl.Grids, Vcl.DBGrids, Vcl.Buttons, Alap,
   VDComboBox, Vcl.WinXCtrls;
 
@@ -15,17 +15,29 @@ type
     le_cim: TLabeledEdit;
     le_hrsz: TLabeledEdit;
     rg_tipus: TRadioGroup;
+    le_jurta_cim: TLabeledEdit;
+    le_jurta_kod: TLabeledEdit;
     Label1: TLabel;
-    LabeledEdit1: TLabeledEdit;
-    Label3: TLabel;
-    vdc_komfort: TVDComboBox;
-    vdc_statusz: TVDComboBox;
+    rg_jurta_tipus: TRadioGroup;
+    Label2: TLabel;
+    BitBtn1: TBitBtn;
+    JURTA: TADOQuery;
+    JURTAds: TDataSource;
+    ts_aktiv: TToggleSwitch;
+    Panel2: TPanel;
+    DBGrid1: TDBGrid;
+    Splitter1: TSplitter;
+    DBGrid2: TDBGrid;
+    BitBtn2: TBitBtn;
     procedure bb_keresClick(Sender: TObject);
-    procedure dbg_listaDblClick(Sender: TObject);
-    procedure FormShow(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
-    procedure bb_ujClick(Sender: TObject);
     procedure SZURESAfterScroll(DataSet: TDataSet);
+    procedure BitBtn1Click(Sender: TObject);
+    procedure BitBtn2Click(Sender: TObject);
+    procedure DBGrid2KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure DBGrid1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
+    procedure DBGrid1TitleClick(Column: TColumn);
+    procedure DBGrid2TitleClick(Column: TColumn);
   private
     { Private declarations }
   public
@@ -39,7 +51,7 @@ implementation
 
 {$R *.dfm}
 
-uses f_BerlemenyAdat_Unit;
+uses AlapAdat;
 
 procedure Tf_BerlemenyKereses.bb_keresClick(Sender: TObject);
 var
@@ -94,29 +106,120 @@ begin
     SZURES.SQL.Add
       ('and (Select x.helyrajziszam From helyrajzi_szamok x Where a.hrsz_id=x.hrsz_id) like '
       + IDCHAR + '%' + le_hrsz.Text + '%' + IDCHAR);
-  if vdc_komfort.ItemIndex<>-1 then
-     SZURES.SQL.Add('and a.komfort_id='+vdc_komfort.Eredmeny+' ');
-  if vdc_statusz.ItemIndex<>-1 then
-     SZURES.SQL.Add('and a.es_id='+vdc_statusz.Eredmeny+' ');
   try
     inherited;
   except
     Uzenet('Hibás lekérdezés!');
   end;
+  //Jurta lekérdezés
+  case rg_jurta_tipus.ItemIndex of
+    0:
+      s := 'SELECT a.* from Lakasok a Where a.kod is not null ';
+    1:
+      s := 'SELECT a.* from Nemlakas a Where a.kod is not null ';
+    else
+      begin
+        Uzenet('Válassz bérlemény típust!');
+        Exit;
+      end;
+  end;
+  JURTA.SQL.Text := s;
+  if le_jurta_cim.Text <> '' then
+    JURTA.SQL.Add
+      ('and a.cim like '+IDCHAR + '%' + le_jurta_cim.Text + '%' + IDCHAR+' ');
+  if le_jurta_kod.Text <> '' then
+    JURTA.SQL.Add
+      ('and a.kod like '+ IDCHAR + '%' + le_jurta_kod.Text + '%' + IDCHAR+' ');
+  if ts_aktiv.State=tssOn then
+    JURTA.SQL.Add('and a.aktiv=1 ');
+  JURTA.SQL.Add('Order By a.CIM');
+  try
+    JURTA.Active:=True;
+  except
+    Uzenet('Hibás lekérdezés!');
+  end;
 end;
 
-procedure Tf_BerlemenyKereses.bb_ujClick(Sender: TObject);
+procedure Tf_BerlemenyKereses.BitBtn1Click(Sender: TObject);
+var s: String;
 begin
   inherited;
-  HIVO:=1;
-  AblakNyit(Tf_BerlemenyAdat, TForm(f_BerlemenyAdat));
+  if Rakerdez('Biztos másolja a JURTA kódot?') then
+  begin
+    case rg_tipus.ItemIndex of
+      0:
+      begin
+          s:=SZURES.FieldByName('LAKAS_ID').AsString;
+          Modositas('L_LAKAS',['JURTA_KOD='+JURTA.FieldByName('KOD').AsString],'LAKAS_ID='+LAK_ID);
+      end;
+      1:
+      begin
+          s:=SZURES.FieldByName('NEM_LAKAS_ID').AsString;
+          Modositas('B_NEM_LAKAS',['JURTA_KOD='+JURTA.FieldByName('KOD').AsString],'NEM_LAKAS_ID='+NLAK_ID);
+      end;
+      2: Modositas('B_NEM_LAKAS',['JURTA_KOD='+JURTA.FieldByName('KOD').AsString],'NEM_LAKAS_ID='+NLAK_ID);
+    end;
+  end;
+    bb_keresClick(Self);
+    case rg_tipus.ItemIndex of
+    0: SZURES.Locate('LAKAS_ID',s,[loPartialKey]);
+    1: SZURES.Locate('NEM_LAKAS_ID',s,[loPartialKey]);
+    end;
 end;
 
-procedure Tf_BerlemenyKereses.dbg_listaDblClick(Sender: TObject);
+procedure Tf_BerlemenyKereses.BitBtn2Click(Sender: TObject);
+var s: String;
 begin
   inherited;
-  HIVO:=0;
-  AblakNyit(Tf_BerlemenyAdat, TForm(f_BerlemenyAdat));
+  if Rakerdez('Biztos másolja a JURTA kódot?') then
+  begin
+    case rg_tipus.ItemIndex of
+      0:
+        begin
+          s:=SZURES.FieldByName('LAKAS_ID').AsString;
+          Modositas('L_LAKAS',['JURTA_KOD='+''],'LAKAS_ID='+LAK_ID);
+        end;
+      1:
+        begin
+          s:=SZURES.FieldByName('NEM_LAKAS_ID').AsString;
+          Modositas('B_NEM_LAKAS',['JURTA_KOD='+''],'NEM_LAKAS_ID='+NLAK_ID);
+        end;
+      2: Modositas('B_NEM_LAKAS',['JURTA_KOD='+''],'NEM_LAKAS_ID='+NLAK_ID);
+    end;
+    bb_keresClick(Self);
+    case rg_tipus.ItemIndex of
+    0: SZURES.Locate('LAKAS_ID',s,[loPartialKey]);
+    1: SZURES.Locate('NEM_LAKAS_ID',s,[loPartialKey]);
+    end;
+  end;
+end;
+
+procedure Tf_BerlemenyKereses.DBGrid1KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  inherited;
+  If Key = vk_F12 Then
+    GridMezok(DBGrid1);
+end;
+
+procedure Tf_BerlemenyKereses.DBGrid1TitleClick(Column: TColumn);
+begin
+  inherited;
+  dbg_TitleClick(DBGrid1, Column);
+end;
+
+procedure Tf_BerlemenyKereses.DBGrid2KeyUp(Sender: TObject; var Key: Word;
+  Shift: TShiftState);
+begin
+  inherited;
+  If Key = vk_F12 Then
+    GridMezok(DBGrid2);
+end;
+
+procedure Tf_BerlemenyKereses.DBGrid2TitleClick(Column: TColumn);
+begin
+  inherited;
+  dbg_TitleClick(DBGrid2, Column);
 end;
 
 procedure Tf_BerlemenyKereses.FormKeyPress(Sender: TObject; var Key: Char);
@@ -124,13 +227,6 @@ begin
   inherited;
   if key = CRCHAR then
     bb_keresClick(Self);
-end;
-
-procedure Tf_BerlemenyKereses.FormShow(Sender: TObject);
-begin
-  inherited;
-  vdc_komfort.Feltolt;
-  vdc_statusz.Feltolt;
 end;
 
 procedure Tf_BerlemenyKereses.SZURESAfterScroll(DataSet: TDataSet);

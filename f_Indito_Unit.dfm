@@ -770,8 +770,8 @@ object f_Indito: Tf_Indito
     TabOrder = 0
     OnExit = cb_adatExit
     Items.Strings = (
-      'TEDI'
-      'TEDI_teszt')
+      'TIR'
+      'TIR_teszt')
   end
   object ai_var: TActivityIndicator
     Left = 8

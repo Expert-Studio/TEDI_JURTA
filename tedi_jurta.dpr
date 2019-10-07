@@ -20,7 +20,9 @@ uses
   f_CimSzerkeszto_Unit in 'f_CimSzerkeszto_Unit.pas' {f_CimSzerkeszto},
   f_AdatMigracio_Unit in 'f_AdatMigracio_Unit.pas' {f_AdatMigracio},
   f_SzervezetKeres_Unit in 'f_SzervezetKeres_Unit.pas' {f_SzervezetKeres},
-  f_EleresAdat_Unit in 'f_EleresAdat_Unit.pas' {f_EleresAdat};
+  f_EleresAdat_Unit in 'f_EleresAdat_Unit.pas' {f_EleresAdat},
+  f_BerlemenyKereses_Unit in 'f_BerlemenyKereses_Unit.pas' {f_BerlemenyKereses},
+  f_BerlemenyAdat_Unit in 'f_BerlemenyAdat_Unit.pas' {f_BerlemenyAdat};
 
 {$R *.res}
 
@@ -41,6 +43,7 @@ begin
   TStyleManager.TrySetStyle('Luna');
   Application.CreateForm(TAdatModul, AdatModul);
   Application.CreateForm(Tf_Foablak, f_Foablak);
+  Application.CreateForm(Tf_BerlemenyAdat, f_BerlemenyAdat);
   try
     If AblakNyit(Tf_Indito, f_Indito) = 19780712 Then
     Begin

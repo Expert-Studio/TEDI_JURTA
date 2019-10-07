@@ -52,6 +52,7 @@ type
     procedure Adatmigrci1Click(Sender: TObject);
     procedure Csarnok1Click(Sender: TObject);
     procedure Szervezetek1Click(Sender: TObject);
+    procedure Laksok1Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -276,6 +277,11 @@ begin
   except end;
   l_szin.Font.Color:=KIJELOLES_SZIN;
   ColorDialog1.Color:=KIJELOLES_SZIN;
+end;
+
+procedure Tf_Foablak.Laksok1Click(Sender: TObject);
+begin
+  AblakNyit(Tf_BerlemenyKereses, TForm(f_BerlemenyKereses));
 end;
 
 procedure Tf_Foablak.l_szinClick(Sender: TObject);

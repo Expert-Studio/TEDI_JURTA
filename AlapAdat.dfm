@@ -6,7 +6,7 @@ object AdatModul: TAdatModul
     ConnectionString = 
       'Provider=SQLNCLI11.1;Persist Security Info=False;User ID=sa;Init' +
       'ial Catalog=TIR_teszt;Data Source=TVVRT-SQL;Initial File Name=""' +
-      ';Server SPN="";'
+      ';Server SPN=""'
     CursorLocation = clUseServer
     LoginPrompt = False
     Mode = cmReadWrite
