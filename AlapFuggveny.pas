@@ -184,7 +184,7 @@ Var
   EP_ID, // Épület ID
   LAK_ID, // Lakása ID
   NLAK_ID, // Nem lakás ID
-  BERL_ID,  //Bérleméyn ID
+  BERL_ID,  //Bérlemény ID
   KEPV_ID, // Képvielet ID
   SZEM_ID, // Személy ID
   SZEM_ANYJA,

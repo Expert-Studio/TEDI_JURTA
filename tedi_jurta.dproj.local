@@ -1,7 +1,7 @@
 ﻿<?xml version="1.0" encoding="utf-8"?>
 <BorlandProject>
 	<Transactions>
-    <Transaction>2019/09/30 09:06:35.000.947,C:\TEDI_JURTA\tedi.dproj=C:\TEDI_JURTA\tedi_jurta.dproj</Transaction>
+    <Transaction>2019/09/30 09:06:35.000.947,C:\TEDI_JURTA\tedi_jurta.dproj=C:\TEDI_JURTA\tedi.dproj</Transaction>
     <Transaction>2019/09/30 09:06:36.000.498,c:\tedi_jurta\modelsupport_tedi\default.txapackage=</Transaction>
     <Transaction>2019/09/30 09:06:37.000.746,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\default.txaPackage</Transaction>
     <Transaction>2019/09/30 09:06:40.000.198,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\default.txvpck</Transaction>
@@ -112,7 +112,7 @@
     <Transaction>2019/09/30 09:25:40.000.384,C:\TEDI_JURTA\f_BerloKeres_Unit.pas=</Transaction>
     <Transaction>2019/09/30 09:45:06.000.185,=C:\TEDI_JURTA\f_SzervezetKeres_Unit.pas</Transaction>
     <Transaction>2019/09/30 15:30:45.000.740,=C:\TEDI_JURTA\f_EleresAdat_Unit.pas</Transaction>
-    <Transaction>2019/10/06 10:41:30.856,=C:\Users\altmann\Documents\GitHub\TEDI_JURTA\f_BerlemenyKereses_Unit.pas</Transaction>
-    <Transaction>2019/10/06 13:18:50.024,=C:\Users\altmann\Documents\GitHub\TEDI_JURTA\f_BerlemenyAdat_Unit.pas</Transaction>
+    <Transaction>2019/10/06 10:41:30.000.856,=C:\Users\altmann\Documents\GitHub\TEDI_JURTA\f_BerlemenyKereses_Unit.pas</Transaction>
+    <Transaction>2019/10/06 13:18:50.000.024,=C:\Users\altmann\Documents\GitHub\TEDI_JURTA\f_BerlemenyAdat_Unit.pas</Transaction>
   </Transactions>
 </BorlandProject>

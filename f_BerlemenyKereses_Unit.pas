@@ -141,7 +141,7 @@ begin
 end;
 
 procedure Tf_BerlemenyKereses.BitBtn1Click(Sender: TObject);
-var s: String;
+var a: String;
 begin
   inherited;
   if Rakerdez('Biztos másolja a JURTA kódot?') then
@@ -149,22 +149,22 @@ begin
     case rg_tipus.ItemIndex of
       0:
       begin
-          s:=SZURES.FieldByName('LAKAS_ID').AsString;
+          a:=SZURES.FieldByName('LAKAS_ID').AsString;
           Modositas('L_LAKAS',['JURTA_KOD='+JURTA.FieldByName('KOD').AsString],'LAKAS_ID='+LAK_ID);
       end;
       1:
       begin
-          s:=SZURES.FieldByName('NEM_LAKAS_ID').AsString;
+          a:=SZURES.FieldByName('NEM_LAKAS_ID').AsString;
           Modositas('B_NEM_LAKAS',['JURTA_KOD='+JURTA.FieldByName('KOD').AsString],'NEM_LAKAS_ID='+NLAK_ID);
       end;
       2: Modositas('B_NEM_LAKAS',['JURTA_KOD='+JURTA.FieldByName('KOD').AsString],'NEM_LAKAS_ID='+NLAK_ID);
     end;
   end;
-    bb_keresClick(Self);
-    case rg_tipus.ItemIndex of
-    0: SZURES.Locate('LAKAS_ID',s,[loPartialKey]);
-    1: SZURES.Locate('NEM_LAKAS_ID',s,[loPartialKey]);
-    end;
+  bb_keresClick(Self);
+  case rg_tipus.ItemIndex of
+  0: SZURES.Locate('LAKAS_ID',a,[loPartialKey]);
+  1: SZURES.Locate('NEM_LAKAS_ID',a,[loPartialKey]);
+  end;
 end;
 
 procedure Tf_BerlemenyKereses.BitBtn2Click(Sender: TObject);

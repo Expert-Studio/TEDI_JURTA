@@ -43,17 +43,16 @@ begin
   TStyleManager.TrySetStyle('Luna');
   Application.CreateForm(TAdatModul, AdatModul);
   Application.CreateForm(Tf_Foablak, f_Foablak);
-  Application.CreateForm(Tf_BerlemenyAdat, f_BerlemenyAdat);
   try
-    If AblakNyit(Tf_Indito, f_Indito) = 19780712 Then
+//    If AblakNyit(Tf_Indito, f_Indito) = 19780712 Then
     Begin
       Application.Run;
     End
-    Else
-    begin
-      Application.Terminate;
-      Halt;
-    end;
+//    Else
+//    begin
+//      Application.Terminate;
+//      Halt;
+//    end;
   except
   end;
 

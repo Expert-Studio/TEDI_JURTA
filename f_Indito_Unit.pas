@@ -131,7 +131,7 @@ begin
   //AlapAdat.AdatModul.ADOConn.ConnectionString := 'Provider=SQLNCLI11.1;' +         //SQL kapcsolat?
   AlapAdat.AdatModul.JURTA.ConnectionString := 'Provider=SQLOLEDB.1;' +
     'Password=Rozsa8183;' + 'Persist Security Info=False;' + 'User ID=sa;' +
-    'Initial Catalog=JurtaTV;' + 'Data Source=192.168.99.3';
+    'Initial Catalog=JurtaTV_teszt;' + 'Data Source=192.168.99.220';
   Try
     AlapAdat.AdatModul.JURTA.Connected := true;
   Except

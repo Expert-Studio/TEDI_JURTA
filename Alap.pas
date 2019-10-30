@@ -31,8 +31,7 @@ Function AblakNyit(TF: TFormClass; Var F: TForm; Preview: Boolean = True;
   Sender: TObject = Nil): Integer;
 
 Function DoksiMasol_Szerverre(Fajlneve: String): Boolean;
-Function DoksiSzerverre(Fajlneve1, Fajlneve2: String;
-  Feluliras: Boolean = False): String;
+Function DoksiSzerverre(Fajlneve1, Fajlneve2: String; Feluliras: Boolean = False): String;
 Function DoksiSzerverrol(Fajlnev: String): String;
 Function DoksiTorles(Fajlnev: String): Boolean;
 Procedure DokuVerzio(id, nev, ev: String);
@@ -41,8 +40,7 @@ function CHR_Replace(const str: String; kar: Char = '_'): String;
 Function Atvalt(Szem: Real): String;
 Function SpaceDel(szov: String): String;
 
-Function Beszuras(Tabla: String; Ertekek: Array of String;
-  Kereshet: Boolean = True): String;
+Function Beszuras(Tabla: String; Ertekek: Array of String; Kereshet: Boolean = True): String;
 Procedure Modositas(Tabla: String; Ertekek: Array of String; Hol: String);
 Procedure Torles(Tabla: String; Hol: String);
 
@@ -100,6 +98,7 @@ Function HonapVeg(const AValue: TDateTime): TDateTime;
 Procedure Doc2Pdf(DocFileName: String; PdfFileName: String = '');
 Procedure GridAllapotToltes(Grid: TDBGrid);
 Procedure GridAllapotMentes(Grid: TDBGrid);
+Function Valos(szov:String):String;
 
 implementation
 
@@ -887,16 +886,16 @@ begin
         Rekord := l[0];
         l.Destroy;
       end;
-      ADOQuery1.Active := False;
-      ADOQuery1.SQL.Text :=
-        'Insert Into esemenynaplo (esemenytipus_id, esemeny_datum, felh_id, erintett_tabla, erintett_rekord, regi_ertek, uj_ertek, felh_csoport_id) '
-        + 'Values (' + IDCHAR + '2' + IDCHAR + ', getdate(),' + IDCHAR +
-        FELHASZNALO_ID + IDCHAR + ',' + IDCHAR + UpperCase(Tabla) + IDCHAR + ','
-        + IDCHAR + Rekord + IDCHAR + ',' + IDCHAR + Regi + IDCHAR + ',' + IDCHAR
-        + StringReplace(Ertek, IDCHAR, '', [rfReplaceAll]) + IDCHAR + ',' +
-        IDCHAR + FELHCSOP_ID + IDCHAR + ')';
-      ADOQuery1.ExecSQL;
-      ADOQuery1.Active := False;
+//      ADOQuery1.Active := False;
+//      ADOQuery1.SQL.Text :=
+//        'Insert Into esemenynaplo (esemenytipus_id, esemeny_datum, felh_id, erintett_tabla, erintett_rekord, regi_ertek, uj_ertek, felh_csoport_id) '
+//        + 'Values (' + IDCHAR + '2' + IDCHAR + ', getdate(),' + IDCHAR +
+//        FELHASZNALO_ID + IDCHAR + ',' + IDCHAR + UpperCase(Tabla) + IDCHAR + ','
+//        + IDCHAR + Rekord + IDCHAR + ',' + IDCHAR + Regi + IDCHAR + ',' + IDCHAR
+//        + StringReplace(Ertek, IDCHAR, '', [rfReplaceAll]) + IDCHAR + ',' +
+//        IDCHAR + FELHCSOP_ID + IDCHAR + ')';
+//      ADOQuery1.ExecSQL;
+//      ADOQuery1.Active := False;
     end;
   End;
 End;
@@ -1975,6 +1974,11 @@ begin
   end
   else
     Result := EncodeDate(ev, ho+1, 1) - 1;
+end;
+
+Function Valos(szov:String):String;
+begin
+  Result:=StringReplace(szov, ',', '.', [rfReplaceAll]);
 end;
 
 Initialization

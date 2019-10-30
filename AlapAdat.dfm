@@ -1,5 +1,6 @@
 object AdatModul: TAdatModul
   OldCreateOrder = False
+  OnCreate = DataModuleCreate
   Height = 198
   Width = 434
   object ADOConn: TADOConnection
