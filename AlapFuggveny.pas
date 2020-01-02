@@ -34,7 +34,10 @@ const
     'ötven', 'hatvan', 'hetven', 'nyolcvan', 'kilencven');
   AT1: array [1 .. 9] of String = ('egy', 'kettõ', 'három', 'négy', 'öt', 'hat',
     'hét', 'nyolc', 'kilenc');
-  SZINERTEK: Array [0 .. 26] of TColor = ($00D0FFFF, // info          0
+  SzamlaEv: Array [1 .. 24] Of String = ('96','97','98','99','00','01','02','03','04','05',
+    '06','07','08','09','10','11','12','13','14','15','16','17','18','19');
+  SZINERTEK: Array [0 .. 26] of TColor =
+   ($00D0FFFF, // info          0
     $0080FFFF, // pasztel sárga 1
     $00FFFFC0, // égszín kék    2
     $00D0D3D5, // pasztel zöld  3

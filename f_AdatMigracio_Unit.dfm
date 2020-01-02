@@ -65,7 +65,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Caption = 'Szem'#233'lyek'
     TabOrder = 4
   end
-  object BitBtn2: TBitBtn [5]
+  object szervezet: TBitBtn [5]
     Left = 16
     Top = 44
     Width = 198
@@ -73,7 +73,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Anchors = [akLeft, akTop, akRight]
     Caption = 'Szervezetek'
     TabOrder = 5
-    OnClick = BitBtn2Click
+    OnClick = szervezetClick
   end
   object m: TMemo [6]
     Left = 233
@@ -85,7 +85,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     TabOrder = 6
     WordWrap = False
   end
-  object BitBtn3: TBitBtn [7]
+  object csarnokberlo: TBitBtn [7]
     Left = 16
     Top = 75
     Width = 198
@@ -93,7 +93,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Anchors = [akLeft, akTop, akRight]
     Caption = 'Csarnok b'#233'rl'#337'k'
     TabOrder = 7
-    OnClick = BitBtn3Click
+    OnClick = csarnokberloClick
   end
   object BitBtn4: TBitBtn [8]
     Left = 16
@@ -133,7 +133,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     TabOrder = 11
     OnClick = BitBtn7Click
   end
-  object BitBtn8: TBitBtn [12]
+  object helyisegszerz: TBitBtn [12]
     Left = 16
     Top = 199
     Width = 198
@@ -141,7 +141,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Anchors = [akLeft, akTop, akRight]
     Caption = 'Helyis'#233'g szerz'#337'd'#233'sek'
     TabOrder = 12
-    OnClick = BitBtn8Click
+    OnClick = helyisegszerzClick
   end
   object BitBtn9: TBitBtn [13]
     Left = 16
@@ -161,7 +161,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Caption = 'Lak'#225's sz'#225'ml'#225'k'
     TabOrder = 14
   end
-  object BitBtn11: TBitBtn [15]
+  object helyisegszamla: TBitBtn [15]
     Left = 16
     Top = 292
     Width = 198
@@ -169,6 +169,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Anchors = [akLeft, akTop, akRight]
     Caption = 'Helyis'#233'g, csarnok sz'#225'ml'#225'k'
     TabOrder = 15
+    OnClick = helyisegszamlaClick
   end
   object BitBtn12: TBitBtn [16]
     Left = 16
@@ -179,7 +180,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Caption = 'Lak'#225's befizet'#233'sek'
     TabOrder = 16
   end
-  object BitBtn13: TBitBtn [17]
+  object bb_helyisegbefizetes: TBitBtn [17]
     Left = 16
     Top = 354
     Width = 198
@@ -187,6 +188,7 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Anchors = [akLeft, akTop, akRight]
     Caption = 'Helyis'#233'g, csarnok befizet'#233'sek'
     TabOrder = 17
+    OnClick = bb_helyisegbefizetesClick
   end
   inherited SZURESds: TDataSource
     Left = 332
@@ -206,5 +208,11 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     Parameters = <>
     Left = 376
     Top = 252
+  end
+  object ADOQuery3: TADOQuery
+    Connection = AdatModul.JURTA
+    Parameters = <>
+    Left = 452
+    Top = 228
   end
 end
