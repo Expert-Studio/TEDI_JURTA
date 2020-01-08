@@ -559,7 +559,6 @@ object f_Foablak: Tf_Foablak
     end
     object Brlk1: TMenuItem
       Caption = 'B'#233'rl'#337'k'
-      Enabled = False
       object Keresse1: TMenuItem
         Caption = 'Keres'#233'se'
       end
@@ -569,7 +568,6 @@ object f_Foablak: Tf_Foablak
     end
     object Adminisztrci1: TMenuItem
       Caption = 'Adminisztr'#225'ci'#243
-      Enabled = False
       object Adatmigrci1: TMenuItem
         Caption = 'Adatmigr'#225'ci'#243
         OnClick = Adatmigrci1Click

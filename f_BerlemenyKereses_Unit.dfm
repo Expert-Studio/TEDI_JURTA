@@ -1,12 +1,12 @@
 inherited f_BerlemenyKereses: Tf_BerlemenyKereses
   Caption = 'B'#233'rlem'#233'ny keres'#233's'
-  ClientHeight = 446
+  ClientHeight = 475
   ClientWidth = 882
   ExplicitWidth = 898
-  ExplicitHeight = 485
+  ExplicitHeight = 514
   DesignSize = (
     882
-    446)
+    475)
   PixelsPerInch = 96
   TextHeight = 13
   object Label1: TLabel [0]
@@ -23,17 +23,7 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
     Height = 13
     Caption = 'TIR'
   end
-  object le_hrsz: TLabeledEdit [2]
-    Left = 8
-    Top = 140
-    Width = 137
-    Height = 21
-    EditLabel.Width = 68
-    EditLabel.Height = 13
-    EditLabel.Caption = 'Helyrajzi sz'#225'm'
-    TabOrder = 2
-  end
-  object rg_tipus: TRadioGroup [3]
+  object rg_tipus: TRadioGroup [2]
     Left = 56
     Top = 24
     Width = 194
@@ -47,14 +37,7 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
       'egy'#233'b')
     TabOrder = 3
   end
-  inherited bb_uj: TBitBtn [4]
-    Left = 838
-    TabOrder = 1
-    Visible = False
-    OnClick = bb_ujClick
-    ExplicitLeft = 838
-  end
-  object le_jurta_kod: TLabeledEdit [5]
+  object le_jurta_kod: TLabeledEdit [3]
     Left = 8
     Top = 315
     Width = 137
@@ -64,7 +47,7 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
     EditLabel.Caption = 'JURTA k'#243'd'
     TabOrder = 7
   end
-  object rg_jurta_tipus: TRadioGroup [6]
+  object rg_jurta_tipus: TRadioGroup [4]
     Left = 50
     Top = 200
     Width = 194
@@ -78,7 +61,7 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
       'egy'#233'b')
     TabOrder = 8
   end
-  object BitBtn1: TBitBtn [7]
+  object BitBtn1: TBitBtn [5]
     Left = 208
     Top = 148
     Width = 36
@@ -189,7 +172,7 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
     TabOrder = 9
     OnClick = BitBtn1Click
   end
-  object ts_aktiv: TToggleSwitch [8]
+  object ts_aktiv: TToggleSwitch [6]
     Left = 169
     Top = 316
     Width = 89
@@ -199,13 +182,14 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
     StateCaptions.CaptionOff = 'Inakt'#237'v'
     TabOrder = 10
   end
-  object Panel2: TPanel [9]
+  object Panel2: TPanel [7]
     Left = 256
     Top = 8
     Width = 618
-    Height = 384
+    Height = 413
     Anchors = [akLeft, akTop, akRight, akBottom]
     TabOrder = 11
+    ExplicitHeight = 384
     object Splitter1: TSplitter
       Left = 1
       Top = 187
@@ -219,7 +203,7 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
       Left = 1
       Top = 192
       Width = 616
-      Height = 191
+      Height = 220
       Align = alClient
       DataSource = JURTAds
       Options = [dgTitles, dgIndicator, dgColumnResize, dgColLines, dgRowLines, dgTabs, dgRowSelect, dgConfirmDelete, dgCancelOnExit, dgMultiSelect, dgTitleClick, dgTitleHotTrack]
@@ -327,55 +311,76 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
         end>
     end
   end
-  inherited dbg_lista: TDBGrid
-    Top = 352
-    Width = 112
-    Height = 39
-    DataSource = nil
-    TabOrder = 12
+  inherited bb_uj: TBitBtn [8]
+    Left = 838
+    TabOrder = 1
     Visible = False
-    OnCellClick = nil
-    Columns = <
-      item
-        Expanded = False
-        FieldName = 'cim'
-        Title.Alignment = taCenter
-        Title.Caption = 'c'#237'm'
-        Width = 210
-        Visible = True
-      end
-      item
-        Expanded = False
-        FieldName = 'hrsz'
-        Title.Alignment = taCenter
-        Width = 139
-        Visible = True
-      end
-      item
-        Expanded = False
-        FieldName = 'terulet'
-        Title.Alignment = taCenter
-        Title.Caption = 'ter'#252'let'
-        Width = 149
-        Visible = True
-      end
-      item
-        Expanded = False
-        FieldName = 'komfort'
-        Title.Alignment = taCenter
-        Width = 87
-        Visible = True
-      end
-      item
-        Expanded = False
-        FieldName = 'statusz'
-        Title.Alignment = taCenter
-        Title.Caption = 'st'#225'tusz'
-        Width = 85
-        Visible = True
-      end>
+    OnClick = bb_ujClick
+    ExplicitLeft = 838
   end
-  object BitBtn2: TBitBtn [11]
+  object le_jurta_cim: TLabeledEdit [9]
+    Left = 8
+    Top = 268
+    Width = 233
+    Height = 21
+    EditLabel.Width = 17
+    EditLabel.Height = 13
+    EditLabel.Caption = 'C'#237'm'
+    TabOrder = 6
+  end
+  object le_cim: TLabeledEdit [10]
+    Left = 8
+    Top = 92
+    Width = 233
+    Height = 21
+    EditLabel.Width = 17
+    EditLabel.Height = 13
+    EditLabel.Caption = 'C'#237'm'
+    TabOrder = 4
+  end
+  inherited Panel1: TPanel [11]
+    Top = 427
+    Width = 882
+    ExplicitTop = 398
+    ExplicitWidth = 882
+    DesignSize = (
+      882
+      48)
+    inherited bb_kilep: TBitBtn
+      Left = 838
+      ExplicitLeft = 838
+    end
+    inherited bb_ok: TBitBtn
+      Left = 796
+      ExplicitLeft = 796
+    end
+    inherited bb_nyomtat: TBitBtn
+      Left = 754
+      ExplicitLeft = 754
+    end
+    inherited bb_excel: TBitBtn
+      Left = 712
+      ExplicitLeft = 712
+    end
+    inherited cb_uj: TCheckBox
+      Left = 601
+      Width = 42
+      ExplicitLeft = 601
+      ExplicitWidth = 42
+    end
+    inherited bb_csv: TBitBtn
+      Left = 670
+      ExplicitLeft = 670
+    end
+  end
+  inherited p_keres: TPanel [12]
+    Left = 276
+    Top = 260
+    TabOrder = 5
+    ExplicitLeft = 276
+    ExplicitTop = 260
+  end
+  object BitBtn2: TBitBtn [13]
     Left = 166
     Top = 148
     Width = 36
@@ -518,67 +523,63 @@ inherited f_BerlemenyKereses: Tf_BerlemenyKereses
     TabOrder = 13
     OnClick = BitBtn2Click
   end
-  object le_jurta_cim: TLabeledEdit [12]
+  object le_hrsz: TLabeledEdit [14]
     Left = 8
-    Top = 268
-    Width = 233
+    Top = 140
+    Width = 137
     Height = 21
-    EditLabel.Width = 17
+    EditLabel.Width = 68
     EditLabel.Height = 13
-    EditLabel.Caption = 'C'#237'm'
-    TabOrder = 6
+    EditLabel.Caption = 'Helyrajzi sz'#225'm'
+    TabOrder = 2
   end
-  inherited p_keres: TPanel [13]
-    Left = 276
-    Top = 260
-    TabOrder = 5
-    ExplicitLeft = 276
-    ExplicitTop = 260
-  end
-  object le_cim: TLabeledEdit [14]
-    Left = 8
-    Top = 92
-    Width = 233
-    Height = 21
-    EditLabel.Width = 17
-    EditLabel.Height = 13
-    EditLabel.Caption = 'C'#237'm'
-    TabOrder = 4
-  end
-  inherited Panel1: TPanel [15]
-    Top = 398
-    Width = 882
-    ExplicitTop = 398
-    ExplicitWidth = 882
-    DesignSize = (
-      882
-      48)
-    inherited bb_kilep: TBitBtn
-      Left = 838
-      ExplicitLeft = 838
-    end
-    inherited bb_ok: TBitBtn
-      Left = 796
-      ExplicitLeft = 796
-    end
-    inherited bb_nyomtat: TBitBtn
-      Left = 754
-      ExplicitLeft = 754
-    end
-    inherited bb_excel: TBitBtn
-      Left = 712
-      ExplicitLeft = 712
-    end
-    inherited cb_uj: TCheckBox
-      Left = 601
-      Width = 42
-      ExplicitLeft = 601
-      ExplicitWidth = 42
-    end
-    inherited bb_csv: TBitBtn
-      Left = 670
-      ExplicitLeft = 670
-    end
+  inherited dbg_lista: TDBGrid [15]
+    Top = 352
+    Width = 112
+    Height = 68
+    DataSource = nil
+    TabOrder = 12
+    Visible = False
+    OnCellClick = nil
+    Columns = <
+      item
+        Expanded = False
+        FieldName = 'cim'
+        Title.Alignment = taCenter
+        Title.Caption = 'c'#237'm'
+        Width = 210
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'hrsz'
+        Title.Alignment = taCenter
+        Width = 139
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'terulet'
+        Title.Alignment = taCenter
+        Title.Caption = 'ter'#252'let'
+        Width = 149
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'komfort'
+        Title.Alignment = taCenter
+        Width = 87
+        Visible = True
+      end
+      item
+        Expanded = False
+        FieldName = 'statusz'
+        Title.Alignment = taCenter
+        Title.Caption = 'st'#225'tusz'
+        Width = 85
+        Visible = True
+      end>
   end
   inherited SZURESds: TDataSource
     Left = 632

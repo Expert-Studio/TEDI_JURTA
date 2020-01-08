@@ -37,22 +37,43 @@ Begin
   end;
 End;
 
+Var
+  Ini: TIniFile;
+
 begin
   Application.Initialize;
   Application.MainFormOnTaskbar := True;
   TStyleManager.TrySetStyle('Luna');
   Application.CreateForm(TAdatModul, AdatModul);
   Application.CreateForm(Tf_Foablak, f_Foablak);
+//  if Not FileExists(ExtractFilePath(ParamStr(0)) + 'tedi.ini') Then
+//  Begin
+//    Uzenet('Nem találom a program futtatásához szükséges tedi.ini fájlt! A program futása leáll.');
+//    Application.Terminate;
+//    Halt;
+//  End;
+//
+//  Ini := TIniFile.Create(ExtractFilePath(ParamStr(0)) + 'tedi.ini');
+//  If Ini.ReadString('Futtatas', 'Adatbazis szerver', '') = '' Then
+//  Begin
+//    Ini.Destroy;
+//    Application.Terminate;
+//    Halt;
+//  End;
   try
-//    If AblakNyit(Tf_Indito, f_Indito) = 19780712 Then
+//    ADOConnection := AdatModul.ADOConn;
+    // Application.Run;
+    If AblakNyit(Tf_Indito, f_Indito) = 19780712 Then
     Begin
+      // form_Hibakezeles.InitFileParam(ChangeFileExt(paramstr(0), '.ini'));
+      // Hibakezeles.Adatbazis:=Adatmodul.ADOConn;
       Application.Run;
     End
-//    Else
-//    begin
-//      Application.Terminate;
-//      Halt;
-//    end;
+    Else
+    begin
+      Application.Terminate;
+      Halt;
+    end;
   except
   end;
 
