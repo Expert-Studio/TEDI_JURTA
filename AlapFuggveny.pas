@@ -255,7 +255,8 @@ Var
   SZERVER, // fájlszerver
   SZERZT_ID,
   SZAMLA_ID,
-  SZAMLAT_ID: String;
+  SZAMLAT_ID,
+  ALAP_KONYVTAR: String;
 
   SZERKESZT,
   EMELO

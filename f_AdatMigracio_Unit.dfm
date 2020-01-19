@@ -110,14 +110,14 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     TabOrder = 9
     OnClick = helyisegadatClick
   end
-  object BitBtn6: TBitBtn [10]
+  object bb_lakasszerz: TBitBtn [10]
     Left = 16
     Top = 168
     Width = 198
     Height = 25
     Caption = 'Lak'#225's szerz'#337'd'#233'sek'
     TabOrder = 10
-    OnClick = BitBtn6Click
+    OnClick = bb_lakasszerzClick
   end
   object bb_hiba: TBitBtn [11]
     Left = 16
@@ -146,14 +146,14 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     TabOrder = 13
     OnClick = csarnokszerzodesClick
   end
-  object BitBtn10: TBitBtn [14]
+  object lakasszamlak: TBitBtn [14]
     Left = 16
     Top = 261
     Width = 198
     Height = 25
     Caption = 'Lak'#225's sz'#225'ml'#225'k'
     TabOrder = 14
-    OnClick = BitBtn10Click
+    OnClick = lakasszamlakClick
   end
   object helyisegszamla: TBitBtn [15]
     Left = 16
@@ -164,15 +164,14 @@ inherited f_AdatMigracio: Tf_AdatMigracio
     TabOrder = 15
     OnClick = helyisegszamlaClick
   end
-  object BitBtn12: TBitBtn [16]
+  object lakasvefiz: TBitBtn [16]
     Left = 16
     Top = 323
     Width = 198
     Height = 25
     Caption = 'Lak'#225's befizet'#233'sek'
-    Enabled = False
     TabOrder = 16
-    OnClick = BitBtn12Click
+    OnClick = lakasvefizClick
   end
   object bb_helyisegbefizetes: TBitBtn [17]
     Left = 16

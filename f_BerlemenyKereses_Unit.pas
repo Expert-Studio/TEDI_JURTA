@@ -29,6 +29,8 @@ type
     Splitter1: TSplitter;
     DBGrid2: TDBGrid;
     BitBtn2: TBitBtn;
+    le_tir_jurta: TLabeledEdit;
+    BitBtn3: TBitBtn;
     procedure bb_keresClick(Sender: TObject);
     procedure FormKeyPress(Sender: TObject; var Key: Char);
     procedure SZURESAfterScroll(DataSet: TDataSet);
@@ -38,6 +40,7 @@ type
     procedure DBGrid1KeyUp(Sender: TObject; var Key: Word; Shift: TShiftState);
     procedure DBGrid1TitleClick(Column: TColumn);
     procedure DBGrid2TitleClick(Column: TColumn);
+    procedure BitBtn3Click(Sender: TObject);
   private
     { Private declarations }
   public
@@ -101,11 +104,14 @@ begin
   if le_cim.Text <> '' then
     SZURES.SQL.Add
       ('and (Select x.cim_sor_1 From cim x Where a.hrsz_id=x.hrsz_id) like ' +
-      IDCHAR + '%' + le_cim.Text + '%' + IDCHAR);
+      IDCHAR + '%' + le_cim.Text + '%' + IDCHAR + ' ');
   if le_hrsz.Text <> '' then
     SZURES.SQL.Add
       ('and (Select x.helyrajziszam From helyrajzi_szamok x Where a.hrsz_id=x.hrsz_id) like '
-      + IDCHAR + '%' + le_hrsz.Text + '%' + IDCHAR);
+      + IDCHAR + '%' + le_hrsz.Text + '%' + IDCHAR + ' ');
+  if le_tir_jurta.Text <> '' then
+      SZURES.SQL.Add
+      ('and jurta_kod like ' + IDCHAR + '%' + le_tir_jurta.Text + '%' + IDCHAR);
   try
     inherited;
   except
@@ -192,6 +198,12 @@ begin
     1: SZURES.Locate('NEM_LAKAS_ID',s,[loPartialKey]);
     end;
   end;
+end;
+
+procedure Tf_BerlemenyKereses.BitBtn3Click(Sender: TObject);
+begin
+  inherited;
+  le_tir_jurta.Text:=JURTA.FieldByName('KOD').AsString;
 end;
 
 procedure Tf_BerlemenyKereses.DBGrid1KeyUp(Sender: TObject; var Key: Word;

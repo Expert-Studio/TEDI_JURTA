@@ -16,13 +16,13 @@ type
     csarnokberlo: TBitBtn;
     bb_lakasok: TBitBtn;
     helyisegadat: TBitBtn;
-    BitBtn6: TBitBtn;
+    bb_lakasszerz: TBitBtn;
     bb_hiba: TBitBtn;
     helyisegszerz: TBitBtn;
     csarnokszerzodes: TBitBtn;
-    BitBtn10: TBitBtn;
+    lakasszamlak: TBitBtn;
     helyisegszamla: TBitBtn;
-    BitBtn12: TBitBtn;
+    lakasvefiz: TBitBtn;
     bb_helyisegbefizetes: TBitBtn;
     ADOQuery1: TADOQuery;
     ADOQuery2: TADOQuery;
@@ -36,10 +36,11 @@ type
     procedure bb_helyisegbefizetesClick(Sender: TObject);
     procedure bb_szemelyClick(Sender: TObject);
     procedure bb_lakasokClick(Sender: TObject);
-    procedure BitBtn6Click(Sender: TObject);
+    procedure bb_lakasszerzClick(Sender: TObject);
     procedure csarnokszerzodesClick(Sender: TObject);
-    procedure BitBtn10Click(Sender: TObject);
-    procedure BitBtn12Click(Sender: TObject);
+    procedure lakasszamlakClick(Sender: TObject);
+    procedure lakasvefizClick(Sender: TObject);
+    procedure bb_keresClick(Sender: TObject);
   private
     { Private declarations }
   public
@@ -62,49 +63,54 @@ var
 begin
   inherited;
   //Végig járni a számlafej táblákat...
-  m.Lines.Add('Helyiség számlák átvétele ______________________________');
   for i := 1 to 24 do
   begin
+    m.Lines.Add('Helyiség számlák átvétele ______________________________'+SzamlaEv[i]);
     //Számlafej - esetleg csak az aktív szerzõdéseknek megfelelõ számlák
     SZURES.Active:=False;
     SZURES.SQL.Text:=
-      'Select a.* From JurtaTV_teszt.dbo.Szlfej'+SzamlaEv[i]+'N a Order By a.SORSZAM ';
+      'Select a.* From JurtaTV_teszt.dbo.Szlfej'+SzamlaEv[i]+'N a '+
+      'Where a.KOD in (Select x.KOD From JurtaTV_teszt.dbo.Nszerzodes x Where x.BERLOKOD=a.BERLOKOD '+
+      'and x.AKTIV=1 and x.JOGCIMKOD<>5) '+
+      'and a.KOD in (Select x.KOD From JurtaTV_teszt.dbo.Nemlakas x Where x.AKTIV=1) '+
+      'Order By a.SORSZAM';
     SZURES.Active:=True;
     SZURES.First;
     while not SZURES.Eof do
     begin
       //Bérlõ keresése a TIR-ben
-      LISTA.SQL.Text:='Select szervezet_id From szervezet Where JURTA_KOD='+SZURES.FieldByName('BERLOKOD').AsString;
+      LISTA.SQL.Text:='Select szervezet_id From szervezet Where JURTA_KOD='+IDCHAR+SZURES.FieldByName('BERLOKOD').AsString+IDCHAR;
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" szervezeti érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" szervezeti érték!');
         SZURES.Next;
         Continue;
       end;
       SZER_ID:=LISTA.FieldByName('szervezet_id').AsString;
       //Bérlemény
-      LISTA.SQL.Text:='Select nem_lakas_id From b_nem_lakas a Where a.JURTA_KOD='+SZURES.FieldByName('KOD').AsString;
+      LISTA.SQL.Text:='Select nem_lakas_id From b_nem_lakas a Where a.JURTA_KOD='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('KOD').AsString+'" helyiség érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+SZURES.FieldByName('KOD').AsString+'" helyiség érték!');
         SZURES.Next;
         Continue;
       end;
       BERL_ID:=LISTA.FieldByName('nem_lakas_id').AsString;
       //Szerzõdés keresése a TIR-ben bérlemény (BERL_ID) és bérlõ (BERLO_ID) alapján - bérleti szerzõdés
       LISTA.SQL.Text:=
-        'Select a.bszerz_id From szerzodes_kapocs a, berleti_szerzodes b Where a.nem_lakas_id='+BERL_ID+' '+
-        'and a.bszerz_id=a.bszerz_id and b.berlo_id=(Select x.berlo_id From berlok x Where x.szervezet_id='+SZER_ID+')';
+        'Select a.bszerz_id, b.berlo_id From szerzodes_kapocs a, berleti_szerzodes b Where a.nem_lakas_id='+BERL_ID+' '+
+        'and a.bszerz_id=a.bszerz_id and b.berlo_id in (Select x.berlo_id From berlok x Where x.szervezet_id='+SZER_ID+')';
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('KOD').AsString+'"-hoz tartozó szerzõdés érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+SZURES.FieldByName('KOD').AsString+'"-hoz tartozó szerzõdés érték!');
         SZURES.Next;
         Continue;
       end;
       SZE_ID:=LISTA.FieldByName('bszerz_id').AsString;
+      BERLO_ID:=LISTA.FieldByName('berlo_id').AsString;
       //Fizetési mód
       if SZURES.FieldByName('FIZMOD').AsString='Átutalás' then fm:='1';
       if SZURES.FieldByName('FIZMOD').AsString='Csekk' then fm:='3';
@@ -117,7 +123,7 @@ begin
           'fm_id='+fm,
           'berlo_id='+BERLO_ID,
           'penz_id=2',             //magyar forint
-          'felh_id='+FELHASZNALO_ID,
+          'felh_id=0',
           'szamla_szama='+SZURES.FieldByName('SORSZAM').AsString,
           'szamla_kelte='+SZURES.FieldByName('KELT').AsString,
           'szamla_teljesites='+SZURES.FieldByName('TELJESITES').AsString,
@@ -129,10 +135,10 @@ begin
           'szamla_ho='+SZURES.FieldByName('KONYVHO').AsString
         ]);
       except
-        m.Lines.Add('- hibás számla rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - hibás számla rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
       end;
       //Számlatörzs
-      ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.szlsor'+SzamlaEv[i]+'N Where sorszam='+SZURES.FieldByName('SORSZAM').AsString;
+      ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.szlsor'+SzamlaEv[i]+'N Where sorszam='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery1.Active:=True;
       while not ADOQuery1.eof do
       begin
@@ -153,11 +159,11 @@ begin
         if ADOQuery1.FieldByName('DIJKOD').AsString = '07' then de:=7;
         if ADOQuery1.FieldByName('DIJKOD').AsString = '60' then de:=8;
         //Mennyiségi keresés
-        LISTA.SQL.Text:='Select me_id From szerzodes_dijelem Where szde_id='+IntToStr(de);
+        LISTA.SQL.Text:='Select * From szerzodes_dijelem Where szde_id='+IntToStr(de);
         LISTA.Active:=True;
         if LISTA.RecordCount=0 then
         begin
-          m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('DIJKOD').AsString+'" díjelem nem található!');
+          m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('DIJKOD').AsString+'" díjelem nem található!');
           SZURES.Next;
           Continue;
         end
@@ -167,17 +173,21 @@ begin
           se:=LISTA.FieldByName('szdt_id').AsString;
           ea:=LISTA.FieldByName('szde_egysegar').AsString;
         end;
-        //Áfakulcs keresés
-        LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery1.FieldByName('afakulcs').AsString;
-        LISTA.Active:=True;
-        if LISTA.RecordCount=0 then
-        begin
-          m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('afakulcs').AsString+'" értékû ÁFA kulcs!');
-          SZURES.Next;
-          Continue;
-        end
+        if ADOQuery1.FieldByName('afakulcs').AsString='TAM' then af:='8'
         else
-          af:=LISTA.FieldByName('afa_id').AsString;
+        begin
+          //Áfakulcs keresés
+          LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery1.FieldByName('afakulcs').AsString;
+          LISTA.Active:=True;
+          if LISTA.RecordCount=0 then
+          begin
+            m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('afakulcs').AsString+'" értékû ÁFA kulcs!');
+            SZURES.Next;
+            Continue;
+          end
+          else
+            af:=LISTA.FieldByName('afa_id').AsString;
+        end;
         //Tétel rögzítés
         try
           Beszuras('szamla_tetel',[
@@ -192,12 +202,12 @@ begin
             'szamlat_brutto='+ADOQuery1.FieldByName('BRUTTO').AsString
           ]);
         except
-          m.Lines.Add('- hibás számlatétel rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
+          m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - hibás számlatétel rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
         end;
         ADOQuery1.Next;
       end;
       //Visszérkezõ számlák kezelése
-      ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.vszamlak Where szamlaszam='+SZURES.FieldByName('SORSZAM').AsString;
+      ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.vszamlak Where szamlaszam='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery1.Active:=True;
       while not ADOQuery1.Eof do
       begin
@@ -219,40 +229,47 @@ begin
       end;
       SZURES.Next;
     end;
+    m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_'+SzamlaEv[i]+'_helyiség_számla.txt');
+    sleep(500);
+    m.Lines.Clear;
+    Application.ProcessMessages;
   end;
+
   m.Lines.Add('Csarnok számlák átvétele ______________________________');
   //Számlafej - esetleg csak az aktív szerzõdéseknek megfelelõ számlák
   SZURES.Active:=False;
   SZURES.SQL.Text:=
-    'Select a.* From JurtaTV_teszt.dbo.Csszamfej a Where Order By a.SORSZAM ';
+    'Select a.* From JurtaTV_teszt.dbo.Csszamfej a '+
+      'Where a.KOD in (Select x.KOD From JurtaTV_teszt.dbo.Csszerzodes x Where x.BERLOKOD=a.BERLOKOD and x.AKTIV=1) '+
+      'Order By a.SORSZAM ';
   SZURES.Active:=True;
   SZURES.First;
   while not SZURES.Eof do
   begin
     //Bérlõ keresése a TIR-ben
-    LISTA.SQL.Text:='Select szervezet_id From szervezet Where JURTA_KOD='+SZURES.FieldByName('BERLOKOD').AsString;
+    LISTA.SQL.Text:='Select szervezet_id From szervezet Where JURTA_KOD='+IDCHAR+SZURES.FieldByName('BERLOKOD').AsString+IDCHAR;
     LISTA.Active:=True;
     if LISTA.RecordCount=0 then
     begin
-      m.Lines.Add('Nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" szervezeti érték!');
+      m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" szervezeti érték!');
       SZURES.Next;
       Continue;
     end;
     SZER_ID:=LISTA.FieldByName('szervezet_id').AsString;
     //Bérlemény nincs benne közvetlenül a csarnok számlákban, így a csarnok bérlemény bérlõ kódra keresve lehet megtalálni
-    ADOQuery1.SQL.Text:='Select a.KOD From csberlemenyek a Where a.BERLOKOD='+SZURES.FieldByName('BERLOKOD').AsString;
+    ADOQuery1.SQL.Text:='Select a.KOD From csberlemenyek a Where a.BERLOKOD='+IDCHAR+SZURES.FieldByName('BERLOKOD').AsString+IDCHAR;
     ADOQuery1.Active:=True;
     if ADOQuery1.RecordCount=0 then
     begin
-      m.Lines.Add('- nincs a "'+SZURES.FieldByName('BERLOKOD').AsString+'" bérlõhöz csarnok bérlemény rendelve.');
+      m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a "'+SZURES.FieldByName('BERLOKOD').AsString+'" bérlõhöz csarnok bérlemény rendelve.');
       SZURES.Next;
       Continue;
     end;
-    LISTA.SQL.Text:='Select berl_id From berlemeny a Where a.JURTA_KOD='+ADOQuery1.FieldByName('KOD').AsString;
+    LISTA.SQL.Text:='Select berl_id From berlemeny a Where a.JURTA_KOD='+IDCHAR+ADOQuery1.FieldByName('KOD').AsString+IDCHAR;
     LISTA.Active:=True;
     if LISTA.RecordCount=0 then
     begin
-      m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('KOD').AsString+'" csarnok érték!');
+      m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+SZURES.FieldByName('KOD').AsString+'" csarnok érték!');
       SZURES.Next;
       Continue;
     end;
@@ -264,7 +281,7 @@ begin
     LISTA.Active:=True;
     if LISTA.RecordCount=0 then
     begin
-      m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('KOD').AsString+'"-hoz tartozó szerzõdés érték!');
+      m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+SZURES.FieldByName('KOD').AsString+'"-hoz tartozó szerzõdés érték!');
       SZURES.Next;
       Continue;
     end;
@@ -281,7 +298,7 @@ begin
         'fm_id='+fm,
         'berlo_id='+BERLO_ID,
         'penz_id=2',             //magyar forint
-        'felh_id='+FELHASZNALO_ID,
+        'felh_id=0',
         'szamla_szama='+SZURES.FieldByName('SORSZAM').AsString,
         'szamla_kelte='+SZURES.FieldByName('KELT').AsString,
         'szamla_teljesites='+SZURES.FieldByName('TELJESITES').AsString,
@@ -293,10 +310,10 @@ begin
         'szamla_ho='+SZURES.FieldByName('KONYVHO').AsString
       ]);
     except
-      m.Lines.Add('- hibás számla rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
+      m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - hibás számla rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
     end;
     //Számlatörzs
-    ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.Csszamtar Where sorszam='+SZURES.FieldByName('SORSZAM').AsString;
+    ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.Csszamtar Where sorszam='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
     ADOQuery1.Active:=True;
     while not ADOQuery1.eof do
     begin
@@ -317,11 +334,11 @@ begin
       if ADOQuery1.FieldByName('DIJKOD').AsString = '07' then de:=7;
       if ADOQuery1.FieldByName('DIJKOD').AsString = '60' then de:=8;
       //Mennyiségi keresés
-      LISTA.SQL.Text:='Select me_id From szerzodes_dijelem Where szde_id='+IntToStr(de);
+      LISTA.SQL.Text:='Select * From szerzodes_dijelem Where szde_id='+IntToStr(de);
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('DIJKOD').AsString+'" díjelem nem található!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('DIJKOD').AsString+'" díjelem nem található!');
         SZURES.Next;
         Continue;
       end
@@ -331,17 +348,21 @@ begin
         se:=LISTA.FieldByName('szdt_id').AsString;
         ea:=LISTA.FieldByName('szde_egysegar').AsString;
       end;
-      //Áfakulcs keresés
-      LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery1.FieldByName('afakulcs').AsString;
-      LISTA.Active:=True;
-      if LISTA.RecordCount=0 then
-      begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('afakulcs').AsString+'" értékû ÁFA kulcs!');
-        SZURES.Next;
-        Continue;
-      end
+      if ADOQuery1.FieldByName('afakulcs').AsString='TAM' then af:='8'
       else
-        af:=LISTA.FieldByName('afa_id').AsString;
+      begin
+        //Áfakulcs keresés
+        LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery1.FieldByName('afakulcs').AsString;
+        LISTA.Active:=True;
+        if LISTA.RecordCount=0 then
+        begin
+          m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('afakulcs').AsString+'" értékû ÁFA kulcs!');
+          SZURES.Next;
+          Continue;
+        end
+        else
+          af:=LISTA.FieldByName('afa_id').AsString;
+      end;
       //Tétel rögzítés
       try
         Beszuras('szamla_tetel',[
@@ -356,12 +377,12 @@ begin
           'szamlat_brutto='+ADOQuery1.FieldByName('BRUTTO').AsString
         ]);
       except
-        m.Lines.Add('- hibás számlatétel rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - hibás számlatétel rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
       end;
       ADOQuery1.Next;
     end;
     //Visszérkezõ számlák kezelése
-    ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.vszamlak Where szamlaszam='+SZURES.FieldByName('SORSZAM').AsString;
+    ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.vszamlak Where szamlaszam='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
     ADOQuery1.Active:=True;
     while not ADOQuery1.Eof do
     begin
@@ -383,6 +404,9 @@ begin
     end;
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_csarnok_számla.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
 procedure Tf_AdatMigracio.szervezetClick(Sender: TObject);
@@ -399,17 +423,17 @@ begin
   SZURES.First;
   while not SZURES.Eof do
   begin
-    //Keresés a TIR rendszerben
-    LISTA.SQL.Text:=
-      'Select szervezet_id From SZERVEZET Where '+
-      'jurta_kod='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
-    LISTA.Active:=True;
-    if LISTA.RecordCount>0 then
-    begin
-      m.Lines.Add('A szervezet már szerepel a TIR rendszerben. (kód: '+SZURES.FieldByName('KOD').AsString+') - '+SZURES.FieldByName('NEV').AsString);
-      SZURES.Next;
-      Continue;
-    end;
+//    //Keresés a TIR rendszerben
+//    LISTA.SQL.Text:=
+//      'Select szervezet_id From SZERVEZET Where '+
+//      'jurta_kod='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
+//    LISTA.Active:=True;
+//    if LISTA.RecordCount>0 then
+//    begin
+//      m.Lines.Add('A szervezet már szerepel a TIR rendszerben. (kód: '+SZURES.FieldByName('KOD').AsString+') - '+SZURES.FieldByName('NEV').AsString);
+//      SZURES.Next;
+//      Continue;
+//    end;
     s:=''; t:=''; u:='';
     //Fizetési mód, típus és tevékenység kiolvasása
     if SZURES.FieldByName('FIZETESMOD').AsString='Átutalás' then s:='1';
@@ -421,19 +445,17 @@ begin
         'Select tev_id From tevekenyseg Where tev_nev='+
         IDCHAR+SZURES.FieldByName('TEVEKENYSEG').AsString+IDCHAR;
       LISTA.Active:=True;
-      if LISTA.RecordCount>0 then u:=LISTA.FieldByName('tev_id').AsString
-      else
-        m.Lines.Add('Nincs a TIR adatbázisban a "'+SZURES.FieldByName('TEVEKENYSEG').AsString+'" tevékenység érték!');
+      if LISTA.RecordCount>0 then u:=LISTA.FieldByName('tev_id').AsString;
     end;
     //Keresés a TIR rendszerben
     LISTA.SQL.Text:=
-      'Select szervezet_id From SZERVEZET Where '+
-      'upper(szervezet_nev)='+IDCHAR+UpperCase(SZURES.FieldByName('NEV').AsString)+IDCHAR;
+      'Select * From SZERVEZET Where '+
+      'upper(szervezet_nev)='+IDCHAR+StringReplace(UpperCase(SZURES.FieldByName('NEV').AsString),IDCHAR,'`',[rfReplaceAll])+IDCHAR;
     LISTA.Active:=True;
     if LISTA.RecordCount=0 then
     begin
       LISTA.SQL.Text:=
-        'Select szervezet_id From SZERVEZET Where '+
+        'Select * From SZERVEZET Where '+
         '(szervezet_nev='+IDCHAR+StringReplace(SZURES.FieldByName('NEV').AsString,IDCHAR,'`',[rfReplaceAll])+IDCHAR+') or '+
         '(adoszam='+IDCHAR+SZURES.FieldByName('ADOSZAM').AsString+IDCHAR+') or '+
         '(cegjegyzekszam='+IDCHAR+SZURES.FieldByName('CEGJEGYZEKSZAM').AsString+IDCHAR+') or '+
@@ -478,7 +500,31 @@ begin
       end;
     end
     else
+    begin
+      m.Lines.Add('A szervezet már szerepel a TIR rendszerben. (kód: '+SZURES.FieldByName('KOD').AsString+') - '+SZURES.FieldByName('NEV').AsString);
       SZER_ID:=LISTA.FieldByName('szervezet_id').AsString;
+      //Ellenõrzések?
+      if Length(SZURES.FieldByName('ADOSZAM').AsString)>13 then
+        m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz adószám!')
+      else
+      begin
+        if (SZURES.FieldByName('ADOSZAM').AsString)<>LISTA.FieldByName('adoszam').AsString then
+        begin
+           m.Lines.Add('- az adószám felülírásra került a TIR-ben');
+           Modositas('szervezet',['adoszam='+SZURES.FieldByName('ADOSZAM').AsString],'szervezet_id='+SZER_ID);
+        end;
+      end;
+      if Length(SZURES.FieldByName('CEGJEGYZEKSZAM').AsString)>12 then
+        m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz cégjegyzékszám!')
+      else
+      begin
+        if (SZURES.FieldByName('CEGJEGYZEKSZAM').AsString)<>LISTA.FieldByName('cegjegyzekszam').AsString then
+        begin
+          m.Lines.Add('- az cégjegyzékszám felülírásra került a TIR-ben');
+           Modositas('szervezet',['cegjegyzekszam='+SZURES.FieldByName('CEGJEGYZEKSZAM').AsString],'szervezet_id='+SZER_ID);
+        end;
+      end;
+    end;
     if TrimStr(SZURES.FieldByName('TELEFON').AsString)<>'' then
     begin
       //Van már telefon (5) elérése?
@@ -632,9 +678,9 @@ begin
         ]);
       except
         if s='' then
-          m.Lines.Add(SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos vezetéknév!');
+          m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos vezetéknév!');
         if t='' then
-          m.Lines.Add(SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos keresztnév!');
+          m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos keresztnév!');
         SZURES.Next;
         Continue;
       end;
@@ -684,9 +730,9 @@ begin
         ]);
       except
         if s='' then
-          m.Lines.Add(SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos vezetéknév!');
+          m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos vezetéknév!');
         if t='' then
-          m.Lines.Add(SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos keresztnév!');
+          m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos keresztnév!');
         SZURES.Next;
         Continue;
       end;
@@ -718,9 +764,9 @@ begin
         ]);
       except
         if s='' then
-          m.Lines.Add(SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos vezetéknév!');
+          m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos vezetéknév!');
         if t='' then
-          m.Lines.Add(SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos keresztnév!');
+          m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz vagy hiányos keresztnév!');
         SZURES.Next;
         Continue;
       end;
@@ -734,6 +780,9 @@ begin
     end;
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_szervezet.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
 procedure Tf_AdatMigracio.csarnokberloClick(Sender: TObject);
@@ -750,17 +799,17 @@ begin
   SZURES.First;
   while not SZURES.Eof do
   begin
-    //Keresés a TIR rendszerben
-    LISTA.SQL.Text:=
-      'Select szervezet_id From SZERVEZET Where '+
-      'jurta_kod='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
-    LISTA.Active:=True;
-    if LISTA.RecordCount>0 then
-    begin
-      m.Lines.Add('A szervezet már szerepel a TIR rendszerben. (kód: '+SZURES.FieldByName('KOD').AsString+') - '+SZURES.FieldByName('NEV').AsString);
-      SZURES.Next;
-      Continue;
-    end;
+//    //Keresés a TIR rendszerben
+//    LISTA.SQL.Text:=
+//      'Select szervezet_id From SZERVEZET Where '+
+//      'jurta_kod='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
+//    LISTA.Active:=True;
+//    if LISTA.RecordCount>0 then
+//    begin
+//      m.Lines.Add('A szervezet már szerepel a TIR rendszerben. (kód: '+SZURES.FieldByName('KOD').AsString+') - '+SZURES.FieldByName('NEV').AsString);
+//      SZURES.Next;
+//      Continue;
+//    end;
     s:=''; t:=''; u:='';
     if SZURES.FieldByName('FIZETESMOD').AsString='Készpénz' then s:='4';
     if SZURES.FieldByName('FIZETESMOD').AsString='Átutalás' then s:='1';
@@ -776,7 +825,7 @@ begin
     end;
     //Keresés a TIR rendszerben
     LISTA.SQL.Text:=
-      'Select szervezet_id From SZERVEZET Where '+
+      'Select * From SZERVEZET Where '+
       '(szervezet_nev='+IDCHAR+StringReplace(SZURES.FieldByName('NEV').AsString,IDCHAR,'`',[rfReplaceAll])+IDCHAR+') or '+
       '(adoszam='+IDCHAR+SZURES.FieldByName('ADOSZAM').AsString+IDCHAR+') or '+
       '(cegjegyzekszam='+IDCHAR+SZURES.FieldByName('CEGJEGYZEKSZAM').AsString+IDCHAR+') or '+
@@ -801,16 +850,41 @@ begin
           'jurta_kod='+SZURES.FieldByName('KOD').AsString
           ]);
       except
-        if Length(SZURES.FieldByName('CEGJEGYZEKSZAM').AsString)>12 then
-          m.Lines.Add(SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz cégjegyzékszám!');
-        if Length(SZURES.FieldByName('ADOSZAM').AsString)>13 then
-          m.Lines.Add(SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz adószám!');
         SZURES.Next;
         Continue;
       end;
+      m.Lines.Add('A csarnok bérlõ rögzítésre került a TIR rendszerben. (kód: '+SZURES.FieldByName('KOD').AsString+') - '+SZURES.FieldByName('NEV').AsString);
+      if Length(SZURES.FieldByName('CEGJEGYZEKSZAM').AsString)>12 then
+        m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz cégjegyzékszám!');
+      if Length(SZURES.FieldByName('ADOSZAM').AsString)>13 then
+        m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz adószám!');
     end
     else
+    begin
+      m.Lines.Add('A csarnok bérlõ már szerepel a TIR rendszerben. (kód: '+SZURES.FieldByName('KOD').AsString+') - '+SZURES.FieldByName('NEV').AsString);
       SZER_ID:=LISTA.FieldByName('szervezet_id').AsString;
+      //Ellenõrzések?
+      if Length(SZURES.FieldByName('ADOSZAM').AsString)>13 then
+        m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz adószám!')
+      else
+      begin
+        if (SZURES.FieldByName('ADOSZAM').AsString)<>LISTA.FieldByName('adoszam').AsString then
+        begin
+           m.Lines.Add('- az adószám felülírásra került a TIR-ben');
+           Modositas('szervezet',['adoszam='+SZURES.FieldByName('ADOSZAM').AsString],'szervezet_id='+SZER_ID);
+        end;
+      end;
+      if Length(SZURES.FieldByName('CEGJEGYZEKSZAM').AsString)>12 then
+        m.Lines.Add('- '+SZURES.FieldByName('KOD').AsString+'-'+SZURES.FieldByName('NEV').AsString+' - Rossz cégjegyzékszám!')
+      else
+      begin
+        if (SZURES.FieldByName('CEGJEGYZEKSZAM').AsString)<>LISTA.FieldByName('cegjegyzekszam').AsString then
+        begin
+          m.Lines.Add('- az cégjegyzékszám felülírásra került a TIR-ben');
+           Modositas('szervezet',['cegjegyzekszam='+SZURES.FieldByName('CEGJEGYZEKSZAM').AsString],'szervezet_id='+SZER_ID);
+        end;
+      end;
+    end;
     if TrimStr(SZURES.FieldByName('TELEFON').AsString)<>'' then
     begin
       //Van már telefon (5) elérése?
@@ -1088,6 +1162,9 @@ begin
     end;
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_csarnok_bérlõk.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
 procedure Tf_AdatMigracio.bb_helyisegbefizetesClick(Sender: TObject);
@@ -1118,7 +1195,7 @@ begin
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" szervezeti érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" szervezeti érték!');
         SZURES.Next;
         Continue;
       end;
@@ -1141,13 +1218,13 @@ begin
       if ADOQuery1.FieldByName('DIJKOD').AsString = '60' then de:=2;
       //Számlatétel keresése - számlaszám és díjkód alapján
       LISTA.SQL.Text:='Select b.szamlat_id '+
-      'From szamla a, szama_tetel b '+
+      'From szamla a, szamla_tetel b '+
       'Where a.szamla_id=b.szamla_id and x.szamla_szama='+IDCHAR+SZURES.FieldByName('SZAMLASZAM').AsString+IDCHAR+' '+
       'and b.szdt_id='+IntToStr(de);
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('SZAMLASZAM').AsString+'" számla érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a "'+SZURES.FieldByName('SZAMLASZAM').AsString+'" számla érték!');
         SZURES.Next;
         Continue;
       end;
@@ -1159,7 +1236,7 @@ begin
       if SZURES.FieldByName('FIZMOD').AsString='9' then fm:='4';
       if fm='' then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('FIZMOD').AsString+'" fizetési módnak megfelelõ kód. ('+SZURES.FieldByName('SZAMLASZAM').AsString+')');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a "'+SZURES.FieldByName('FIZMOD').AsString+'" fizetési módnak megfelelõ kód. ('+SZURES.FieldByName('SZAMLASZAM').AsString+')');
         SZURES.Next;
         Continue;
       end;
@@ -1185,6 +1262,10 @@ begin
       ]);
       SZURES.Next;
     end;
+    m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_'+SzamlaEv[i]+'_helyiség_befizetés.txt');
+    sleep(500);
+    m.Lines.Clear;
+    Application.ProcessMessages;
   end;
   m.Lines.Add('Csarnok befizetések átvétele ______________________________');
   //Számlafej
@@ -1206,7 +1287,7 @@ begin
     LISTA.Active:=True;
     if LISTA.RecordCount=0 then
     begin
-      m.Lines.Add('- nincs a TIR adatbázisban a '+SZURES.FieldByName('BERLOKOD').AsString+' szervezeti érték!');
+      m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a '+SZURES.FieldByName('BERLOKOD').AsString+' szervezeti érték!');
       SZURES.Next;
       Continue;
     end;
@@ -1224,13 +1305,13 @@ begin
     begin
       //Számlatétel keresése - számlaszám és díjkód alapján
       LISTA.SQL.Text:='Select b.szamlat_id '+
-      'From szamla a, szama_tetel b '+
+      'From szamla a, szamla_tetel b '+
       'Where a.szamla_id=b.szamla_id and x.szamla_szama='+IDCHAR+SZURES.FieldByName('SZAMLASZAM').AsString+IDCHAR+' '+
       'and b.szdt_id='+IntToStr(de);
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a '+SZURES.FieldByName('SZAMLASZAM').AsString+' számla érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a '+SZURES.FieldByName('SZAMLASZAM').AsString+' számla érték!');
         SZURES.Next;
         Continue;
       end;
@@ -1263,6 +1344,10 @@ begin
     ]);
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_csarnok_befizetés.txt');
+  sleep(500);
+  m.Lines.Clear;
+  Application.ProcessMessages;
 end;
 
 procedure Tf_AdatMigracio.helyisegadatClick(Sender: TObject);
@@ -1279,27 +1364,19 @@ begin
   while not SZURES.Eof do
   begin
     LISTA.SQL.Text:=
-      'Select nem_lakas_id From B_NEM_LAKAS Where JURTA_KOD='+
+      'Select * From B_NEM_LAKAS Where JURTA_KOD='+
       IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
     LISTA.Active:=True;
     if LISTA.RecordCount>0 then
     begin
-      m.Lines.Add('Helyiség bérlemény már létezik a TIR-ben ('+SZURES.FieldByName('KOD').AsString+')');
-      //HRSZ
-      LISTA.SQL.Text:='Select x.nem_lakas_id, x.osszes_terulet, '+
-      '(Select y.helyrajziszam From helyrajzi_szamok y Where y.hrsz_id=x.hrsz_id) as hrsz '+
-      'From B_NEM_LAKAS x Where x.JURTA_KOD='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
-      LISTA.Active:=True;
-      if LISTA.FieldByName('hrsz').AsString<>SZURES.FieldByName('hrsz').AsString+'/'+SZURES.FieldByName('albetet').AsString then
-         m.Lines.Add('- hrsz hiba: '+SZURES.FieldByName('KOD').AsString+' ('+SZURES.FieldByName('hrsz').AsString+'/'+SZURES.FieldByName('albetet').AsString+') - '+
-         LISTA.FieldByName('nem_lakas_id').AsString+' ('+LISTA.FieldByName('hrsz').AsString+')');
+//      m.Lines.Add('Helyiség bérlemény már létezik a TIR-ben ('+SZURES.FieldByName('KOD').AsString+')');
       //terület
       if LISTA.FieldByName('osszes_terulet').AsString<>SZURES.FieldByName('alapterulet').AsString then
-         m.Lines.Add('- terület hiba: '+SZURES.FieldByName('KOD').AsString+' ('+SZURES.FieldByName('alapterulet').AsString+') - '+
+         m.Lines.Add('- terület hiba: '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('alapterulet').AsString+') - '+
          LISTA.FieldByName('nem_lakas_id').AsString+' ('+LISTA.FieldByName('osszes_terulet').AsString+')');
       if LISTA.RecordCount>1 then
       begin
-         m.Lines.Add('- több JURTA kód: '+SZURES.FieldByName('KOD').AsString);
+         m.Lines.Add('- több JURTA kód: '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+')');
          SZURES.Next;
          Continue;
       end;
@@ -1321,9 +1398,12 @@ begin
       end;
     end
     else
-      m.Lines.Add('A helyiség nem szerepel a TIR rendszerben. ('+SZURES.FieldByName('KOD').AsString+')');
+      m.Lines.Add(SZURES.FieldByName('CIM').AsString + ' a helyiség nem szerepel a TIR rendszerben. ('+SZURES.FieldByName('KOD').AsString+')');
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_helyiség.txt');
+  sleep(500);
+  m.Lines.Clear;
   //Csarnok rögzítése bérleményként
   m.Lines.Add('Csarnok átvétele ______________________________');
   SZURES.Active:=False;
@@ -1447,6 +1527,9 @@ begin
       m.Lines.Add('Csarnok bérlemény már létezik a TIR-ben ('+SZURES.FieldByName('KOD').AsString+')');
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_csarnok.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
 procedure Tf_AdatMigracio.bb_szemelyClick(Sender: TObject);
@@ -1537,7 +1620,21 @@ begin
       end;
     end
     else
+    begin
       SZEM_ID:=LISTA.FieldByName('szemely_id').AsString;
+      Modositas('SZEMELY',[
+        'anyja_neve='+SZURES.FieldByName('ANYJANEVE').AsString,
+        'szig_szam='+SZURES.FieldByName('SZIG').AsString,
+        'szuletesi_hely='+StringReplace(SZURES.FieldByName('SZULHELY').AsString,',','',[rfReplaceAll]),
+        'szuletesi_datum='+StrDate(SZURES.FieldByName('SZULIDO').AsString),
+        'leanykori_nev='+SZURES.FieldByName('SZULNEV').AsString,
+        'szamlaszam='+SZURES.FieldByName('szamlaszam').AsString,
+        'szemely_kezdete='+'20060101',
+        'szemely_vege='+StrDate(MAXDAT),
+        'szemely_megjegyzes='+SZURES.FieldByName('MEGJEGYZES').AsString,
+        'jurta_kod='+SZURES.FieldByName('KOD').AsString
+        ],'szemely_id='+SZEM_ID);
+    end;
     if TrimStr(SZURES.FieldByName('TELEFON').AsString)<>'' then
     begin
       //Van már telefon (5) elérése?
@@ -1634,58 +1731,65 @@ begin
     end;
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_személy.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
-procedure Tf_AdatMigracio.BitBtn10Click(Sender: TObject);
+procedure Tf_AdatMigracio.lakasszamlakClick(Sender: TObject);
 var
   i,de: Integer;
   fm, szt, af, me, se, ea: String;
 begin
   inherited;
   //Végig járni a számlafej táblákat...
-  m.Lines.Add('Lakás számlák átvétele ______________________________');
   for i := 1 to 24 do
   begin
+    m.Lines.Add('Lakás számlák átvétele ______________________________'+SzamlaEv[i]);
     //Számlafej - esetleg csak az aktív szerzõdéseknek megfelelõ számlák
     SZURES.Active:=False;
     SZURES.SQL.Text:=
-      'Select a.* From JurtaTV_teszt.dbo.Szlfej'+SzamlaEv[i]+'L a Order By a.SORSZAM ';
+      'Select a.* From JurtaTV_teszt.dbo.Szlfej'+SzamlaEv[i]+'L a '+
+      'Where a.KOD in (Select x.KOD From JurtaTV_teszt.dbo.Lszerzodes x Where x.BERLOKOD=a.BERLOKOD and x.AKTIV=1) '+
+      'and a.KOD in (Select x.KOD From JurtaTV_teszt.dbo.Lakasok x Where x.AKTIV=1 and x.JOGCIMKOD<>'+IDCHAR+'80'+IDCHAR+') '+
+      'Order By a.SORSZAM ';
     SZURES.Active:=True;
     SZURES.First;
     while not SZURES.Eof do
     begin
       //Bérlõ keresése a TIR-ben
-      LISTA.SQL.Text:='Select szemely_id From szemely Where JURTA_KOD='+SZURES.FieldByName('BERLOKOD').AsString;
+      LISTA.SQL.Text:='Select szemely_id From szemely Where JURTA_KOD='+IDCHAR+SZURES.FieldByName('BERLOKOD').AsString+IDCHAR;
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" személy érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLONEV').AsString+'" személy érték!');
         SZURES.Next;
         Continue;
       end;
       SZEM_ID:=LISTA.FieldByName('szemely_id').AsString;
       //Bérlemény
-      LISTA.SQL.Text:='Select lakas_id From l_lakas a Where a.JURTA_KOD='+SZURES.FieldByName('KOD').AsString;
+      LISTA.SQL.Text:='Select lakas_id From l_lakas a Where a.JURTA_KOD='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a '+SZURES.FieldByName('KOD').AsString+' lakás érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a '+SZURES.FieldByName('KOD').AsString+' lakás érték!');
         SZURES.Next;
         Continue;
       end;
       BERL_ID:=LISTA.FieldByName('lakas_id').AsString;
       //Szerzõdés keresése a TIR-ben bérlemény (BERL_ID) és bérlõ (BERLO_ID) alapján - bérleti szerzõdés
       LISTA.SQL.Text:=
-        'Select a.bszerz_id From szerzodes_kapocs a, berleti_szerzodes b Where a.lakas_id='+BERL_ID+' '+
-        'and a.bszerz_id=a.bszerz_id and b.berlo_id=(Select x.berlo_id From berlok x Where x.szemely_id='+SZEM_ID+')';
+        'Select a.bszerz_id, b.berlo_id From szerzodes_kapocs a, berleti_szerzodes b Where a.lakas_id='+BERL_ID+' '+
+        'and a.bszerz_id=a.bszerz_id and b.berlo_id in (Select x.berlo_id From berlok x Where x.szemely_id='+SZEM_ID+')';
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a '+SZURES.FieldByName('KOD').AsString+'-hoz tartozó szerzõdés érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a '+SZURES.FieldByName('KOD').AsString+'-hoz tartozó szerzõdés érték!');
         SZURES.Next;
         Continue;
       end;
       SZE_ID:=LISTA.FieldByName('bszerz_id').AsString;
+      BERLO_ID:=LISTA.FieldByName('berlo_id').AsString;
       //Fizetési mód
       if SZURES.FieldByName('FIZMOD').AsString='Beszedés' then fm:='5';
       if SZURES.FieldByName('FIZMOD').AsString='Átutalás' then fm:='1';
@@ -1700,7 +1804,7 @@ begin
           'fm_id='+fm,
           'berlo_id='+BERLO_ID,
           'penz_id=2',             //magyar forint
-          'felh_id='+FELHASZNALO_ID,
+          'felh_id=0',
           'szamla_szama='+SZURES.FieldByName('SORSZAM').AsString,
           'szamla_kelte='+SZURES.FieldByName('KELT').AsString,
           'szamla_teljesites='+SZURES.FieldByName('TELJESITES').AsString,
@@ -1712,10 +1816,10 @@ begin
           'szamla_ho='+SZURES.FieldByName('KONYVHO').AsString
         ]);
       except
-        m.Lines.Add('- hibás számla rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - hibás számla rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
       end;
       //Számlatörzs
-      ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.szlsor'+SzamlaEv[i]+'L Where sorszam='+SZURES.FieldByName('SORSZAM').AsString;
+      ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.szlsor'+SzamlaEv[i]+'L Where sorszam='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery1.Active:=True;
       while not ADOQuery1.eof do
       begin
@@ -1736,11 +1840,11 @@ begin
         if ADOQuery1.FieldByName('DIJKOD').AsString = '7' then de:=7;
         if ADOQuery1.FieldByName('DIJKOD').AsString = '60' then de:=8;
         //Mennyiségi keresés
-        LISTA.SQL.Text:='Select me_id From szerzodes_dijelem Where szde_id='+IntToStr(de);
+        LISTA.SQL.Text:='Select me_id,szdt_id, szde_egysegar From szerzodes_dijelem Where szde_id='+IntToStr(de);
         LISTA.Active:=True;
         if LISTA.RecordCount=0 then
         begin
-          m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('DIJKOD').AsString+'" díjelem nem található!');
+          m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('DIJKOD').AsString+'" díjelem nem található!');
           SZURES.Next;
           Continue;
         end
@@ -1751,16 +1855,20 @@ begin
           ea:=LISTA.FieldByName('szde_egysegar').AsString;
         end;
         //Áfakulcs keresés
-        LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery1.FieldByName('afakulcs').AsString;
-        LISTA.Active:=True;
-        if LISTA.RecordCount=0 then
-        begin
-          m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('afakulcs').AsString+'" értékû ÁFA kulcs!');
-          SZURES.Next;
-          Continue;
-        end
+        if ADOQuery1.FieldByName('afakulcs').AsString='TAM' then af:='8'
         else
-          af:=LISTA.FieldByName('afa_id').AsString;
+        begin
+          LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery1.FieldByName('afakulcs').AsString;
+          LISTA.Active:=True;
+          if LISTA.RecordCount=0 then
+          begin
+            m.Lines.Add('- nincs a TIR adatbázisban a "'+ADOQuery1.FieldByName('afakulcs').AsString+'" értékû ÁFA kulcs!');
+            SZURES.Next;
+            Continue;
+          end
+          else
+            af:=LISTA.FieldByName('afa_id').AsString;
+        end;
         //Tétel rögzítés
         try
           Beszuras('szamla_tetel',[
@@ -1775,12 +1883,12 @@ begin
             'szamlat_brutto='+ADOQuery1.FieldByName('BRUTTO').AsString
           ]);
         except
-          m.Lines.Add('- hibás számlatétel rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
+          m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - hibás számlatétel rögzítés ('+SZURES.FieldByName('SORSZAM').AsString+')');
         end;
         ADOQuery1.Next;
       end;
       //Visszérkezõ számlák kezelése
-      ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.vszamlak Where szamlaszam='+SZURES.FieldByName('SORSZAM').AsString;
+      ADOQuery1.SQL.Text:='Select * From JurtaTV_teszt.dbo.vszamlak Where szamlaszam='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery1.Active:=True;
       while not ADOQuery1.Eof do
       begin
@@ -1802,22 +1910,26 @@ begin
       end;
       SZURES.Next;
     end;
+    m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_'+SzamlaEv[i]+'_lakás_számla.txt');
+    sleep(500);
+    m.Lines.Clear;
+    Application.ProcessMessages;
   end;
 end;
 
-procedure Tf_AdatMigracio.BitBtn12Click(Sender: TObject);
+procedure Tf_AdatMigracio.lakasvefizClick(Sender: TObject);
 var i, de: Integer;
     BEF_ID, fm: String;
 begin
   inherited;
   //Végig járni a befizetés táblákat...
-  m.Lines.Add('Lakás befizetések átvétele ______________________________');
   for i := 1 to 24 do
   begin
+    m.Lines.Add('Lakás befizetések átvétele ______________________________'+SzamlaEv[i]);
     SZURES.Active:=False;
     SZURES.SQL.Text:=
       'Select a.* From JurtaTV_teszt.dbo.Befiz'+SzamlaEv[i]+'L a '+
-      'Where a.KOD in (Select x.KOD From Lakasok x Where x.AKTIV=1) '+
+      'Where a.KOD in (Select x.KOD From JurtaTV_teszt.dbo.Lakasok x Where x.AKTIV=1) '+
       'Order By a.SORSZAM ';
     SZURES.Active:=True;
     SZURES.First;
@@ -1832,7 +1944,7 @@ begin
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" személy érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a "'+SZURES.FieldByName('BERLOKOD').AsString+'" személy érték!');
         SZURES.Next;
         Continue;
       end;
@@ -1843,13 +1955,13 @@ begin
       if ADOQuery1.FieldByName('DIJKOD').AsString = '21' then de:=4;
       //Számlatétel keresése - számlaszám és díjkód alapján
       LISTA.SQL.Text:='Select b.szamlat_id '+
-      'From szamla a, szama_tetel b '+
+      'From szamla a, szamla_tetel b '+
       'Where a.szamla_id=b.szamla_id and x.szamla_szama='+IDCHAR+SZURES.FieldByName('SZAMLASZAM').AsString+IDCHAR+' '+
       'and b.szdt_id='+IntToStr(de);
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('SZAMLASZAM').AsString+'" számla érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a "'+SZURES.FieldByName('SZAMLASZAM').AsString+'" számla érték!');
         SZURES.Next;
         Continue;
       end;
@@ -1861,7 +1973,7 @@ begin
       if SZURES.FieldByName('FIZMOD').AsString='4' then fm:='4';
       if fm='' then
       begin
-        m.Lines.Add('- nincs a TIR adatbázisban a "'+SZURES.FieldByName('FIZMOD').AsString+'" fizetési módnak megfelelõ kód. ('+SZURES.FieldByName('SZAMLASZAM').AsString+')');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a "'+SZURES.FieldByName('FIZMOD').AsString+'" fizetési módnak megfelelõ kód. ('+SZURES.FieldByName('SZAMLASZAM').AsString+')');
         SZURES.Next;
         Continue;
       end;
@@ -1887,21 +1999,28 @@ begin
       ]);
       SZURES.Next;
     end;
+    m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_'+SzamlaEv[i]+'_lakás_befizetés.txt');
+    sleep(500);
+    m.Lines.Clear;
+    Application.ProcessMessages;
   end;
 
 end;
 
-procedure Tf_AdatMigracio.BitBtn6Click(Sender: TObject);
-var sza,bj,df,bs,de: Integer;
-    af,me,se,ea: String;
+procedure Tf_AdatMigracio.bb_lakasszerzClick(Sender: TObject);
+var sza,bj,ds,bs,de: Integer;
+    af,me,se,ea,vegdat: String;
 begin
   inherited;
-  //Helyiség szerzõdések
+  //Lakás szerzõdések
   m.Lines.Add('Lakás szerzõdések átvétele ______________________________');
-  SZURES.SQL.Text:='Select * From JurtaTV_teszt.dbo.Lszerzodes Where AKTIV=1';
+  SZURES.SQL.Text:=
+    'Select * From JurtaTV_teszt.dbo.Lszerzodes Where AKTIV=1'+
+    'and TIPUS='+IDCHAR+'Új kötés'+IDCHAR;
   SZURES.Active:=True;
   while not SZURES.Eof do
   begin
+    SZEM_ID:=''; BERLO_ID:=''; bj:=0;
     //Szerepel a TIR-ben a helyiség?
     LISTA.SQL.Text:=
       'Select lakas_id From L_LAKAS Where JURTA_KOD='+
@@ -1909,7 +2028,8 @@ begin
     LISTA.Active:=True;
     if LISTA.RecordCount=0 then
     begin
-      m.Lines.Add('Nincs a TIR lakás adatbázisban a '+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR+' JURTA kód értéke!');
+      m.Lines.Add('Nincs a TIR lakás adatbázisban a '+IDCHAR+SZURES.FieldByName('CIM').AsString+IDCHAR+
+      '('+SZURES.FieldByName('KOD').AsString+') JURTA lakás!');
       SZURES.Next;
       Continue;
     end
@@ -1928,19 +2048,34 @@ begin
         Continue;
       end;
       //Szerzõdés és hivatkozott szerzõdés, amibõl több is lehet
-      ADOQuery1.SQL.Text:=
-        'Select * From JurtaTV_teszt.dbo.Lszerzodes Where '+
-        '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
-        ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+') '+
-        'Order By AKTIV desc, VALTOZAT';
+      if SZURES.FieldByName('KAPCSOLT').AsString<>'' then
+         ADOQuery1.SQL.Text:=
+          'Select * From JurtaTV_teszt.dbo.Lszerzodes Where '+
+          '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
+          ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+') '+
+          'Order By AKTIV desc, VALTOZAT'
+      else
+         ADOQuery1.SQL.Text:=
+          'Select * From JurtaTV_teszt.dbo.Lszerzodes Where '+
+          'SORSZAM='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery1.Active:=True;
       //Szerzõdés dátumai
-      ADOQuery2.SQL.Text:=
-        'Select MIN(jogcimkezdet) as kezd, MAX(jogcimveg) as veg '+
-        'From JurtaTV_teszt.dbo.Lszerzodes Where '+
-        '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
-        ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+')';
-      ADOQuery2.Active:=True;
+      try
+        if SZURES.FieldByName('KAPCSOLT').AsString<>'' then
+           ADOQuery2.SQL.Text:=
+            'Select MIN(jogcimkezdet) as kezd, MAX(jogcimveg) as veg '+
+            'From JurtaTV_teszt.dbo.Lszerzodes Where '+
+            '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
+            ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+')'
+        else
+           ADOQuery2.SQL.Text:=
+            'Select (jogcimkezdet) as kezd, (jogcimveg) as veg '+
+            'From JurtaTV_teszt.dbo.Lszerzodes Where '+
+            'SORSZAM='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
+        ADOQuery2.Active:=True;
+      except
+        m.Lines.Add('JURTA: '+SZURES.FieldByName('CIM').AsString+' - hibás lekérdezés a kapcsolt szerzõdésnél ('+SZURES.FieldByName('SORSZAM').AsString+')');
+      end;
       //Az elsõ aktív szerzõdés bérlõje
       if ADOQuery1.FieldByName('BERLOKOD').AsString<>'' then
       begin
@@ -1949,7 +2084,7 @@ begin
         LISTA.Active:=True;
         if LISTA.RecordCount=0 then
         begin
-          m.Lines.Add('Nincs a TIR személy adatbázisban a "'+SZURES.FieldByName('BERLONEV').AsString+'" ('+SZURES.FieldByName('BERLOKOD').AsString+') JURTA bérlõkód érték!');
+          m.Lines.Add('JURTA: '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR személy adatbázisban a "'+SZURES.FieldByName('BERLONEV').AsString+'" ('+SZURES.FieldByName('BERLOKOD').AsString+') JURTA bérlõkód érték!');
           SZURES.Next;
           Continue;
         end
@@ -1974,49 +2109,71 @@ begin
       //Végig menni a szerzõdéseken, az elsõ lesz egy új szerzõdés a többi változás
       bj:=0;
       //Eredeti szerzõdés
-      if ADOQuery1.FieldByName('VALTOZAT').AsInteger=0 then
+//      if ADOQuery1.FieldByName('VALTOZAT').AsInteger=0 then
       begin
-        if ADOQuery2.FieldByName('veg').AsDateTime<date then sza:=6 else sza:=2;
-        if ADOQuery2.FieldByName('veg').AsDateTime<date then bs:=3 else bs:=1;
+        if StrDate(ADOQuery2.FieldByName('veg').AsString)='' then
+        begin
+          vegdat:='21001231';
+          sza:=2;
+          bs:=1;
+        end
+        else
+        begin
+          try
+            if ADOQuery2.FieldByName('veg').AsDateTime<date then sza:=6 else sza:=2;
+            if ADOQuery2.FieldByName('veg').AsDateTime<date then bs:=3 else bs:=1;
+          except
+            m.Lines.Add('Hibás dátum a '+SZURES.FieldByName('CIM').AsString+' lakás szerzõdésnél');
+          end;
+        end;
         if ADOQuery1.FieldByName('JOGCIMKOD').AsString='10' then bj:=1;
         if ADOQuery1.FieldByName('JOGCIMKOD').AsString='61' then bj:=1;
         if ADOQuery1.FieldByName('JOGCIMKOD').AsString='11' then bj:=9;
         if ADOQuery1.FieldByName('JOGCIMKOD').AsString='41' then bj:=3;
-        Beszuras('BERLO_KAPCSOLAT',[
-          'berlo_id='+BERLO_ID,
-          'berlesjog_id='+IntToStr(bj),
-          'bstatusz_id='+IntToStr(bs),
-          'lakas_id='+LAK_ID,
-          'berles_kezdet_datuma='+ADOQuery2.FieldByName('kezd').AsString,
-          'berles_vege_datuma='+ADOQuery2.FieldByName('veg').AsString
-        ]);
-        if ADOQuery1.FieldByName('GYAKORISAG').AsInteger=1 then df:=5 else df:=2;
-        SZE_ID:=Beszuras('berleti_szerzodes',[
-          'szi_id=2',
-          'berlesjog_id='+IntToStr(bj),        //bérlésjog a jogcímbõl
-          'sza_id='+IntToStr(sza),             //szerzõdés állapota
-          'bt_id=2',                           //bérlemény típus = helyiség
-          'dsz_id=2',                          //díjszámítás módja = piaci
-          'df_id='+IntToStr(df),               //díjfizetés = havi
-          'szerz_ev='+LeftStr(ADOQuery2.FieldByName('veg').AsString,4),
-          'szerz_szam=0',
-          'szerz_ter='+Valos(FloatToStr(SZURES.FieldByName('TERULET').AsFloat)),
-          'bado_szama='+SZURES.FieldByName('HATAROZATSZAM').AsString,
-          'bado_datuma='+StrDate(SZURES.FieldByName('HATAROZATKELT').AsString),
-          'berles_celja='+SZURES.FieldByName('CEL').AsString,
-          'kiut_szama='+SZURES.FieldByName('KIUTALOSZAM').AsString,
-          'kiut_datuma='+StrDate(SZURES.FieldByName('KIUTALOKELT').AsString),
-          'szerz_datum='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-          'szerz_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-          'szerz_meddig='+StrDate(ADOQuery2.FieldByName('veg').AsString),
-          'szerz_ovadek='+SZURES.FieldByName('OVADEK').AsString,
-          'szerz_emeles='+SZURES.FieldByName('EMELESTILTAS').AsString,
-          'szerz_automata='+SZURES.FieldByName('AUTOEMELES').AsString,
-          'szerz_emelesszaz='+SZURES.FieldByName('emeles').AsString,
-          'szerz_leiras='+SZURES.FieldByName('MEGJEGYZES').AsString,
-          'berlo_id='+BERLO_ID,
-          'jurta_kod='+SZURES.FieldByName('SORSZAM').AsString
-        ],false);
+        try
+          Beszuras('BERLO_KAPCSOLAT',[
+            'berlo_id='+BERLO_ID,
+            'berlesjog_id='+IntToStr(bj),
+            'bstatusz_id='+IntToStr(bs),
+            'lakas_id='+LAK_ID,
+            'berles_kezdet_datuma='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+            'berles_vege_datuma='+vegdat
+          ]);
+        except
+            m.Lines.Add('Hibás dátum a '+SZURES.FieldByName('CIM').AsString+' lakás szerzõdés bérlõ kapcsolatnál');
+        end;
+        //Díjszámítási mód a lakás adatból
+        ADOQuery3.SQL.Text:=
+          'Select DIJSZAMKOD From JurtaTV_teszt.dbo.Lakasok Where KOD='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
+        ADOQuery3.Active:=True;
+        if ADOQuery3.FieldByName('DIJSZAMKOD').AsInteger=1 then ds:=2 else ds:=1;
+        try
+          SZE_ID:=Beszuras('berleti_szerzodes',[
+            'szi_id=2',
+            'szv_id=2',
+            'berlesjog_id='+IntToStr(bj),        //bérlésjog a jogcímbõl
+            'sza_id='+IntToStr(sza),             //szerzõdés állapota
+            'bt_id=1',                           //bérlemény típus = lakás
+            'dsz_id='+IntToStr(ds),              //díjszámítás módja = piaci
+            'df_id=2',                           //díjfizetés = havi
+            'szerz_ev='+LeftStr(ADOQuery2.FieldByName('kezd').AsString,4),
+            'szerz_szam=0',
+            'szerz_ter='+Valos(FloatToStr(SZURES.FieldByName('TERULET').AsFloat)),
+            'bado_szama='+SZURES.FieldByName('ELRENDELOSZAM').AsString,
+            'bado_datuma='+StrDate(SZURES.FieldByName('ELRENDELOKELT').AsString),
+            'kiut_szama='+SZURES.FieldByName('KIJELOLOSZAM').AsString,
+            'kiut_datuma='+StrDate(SZURES.FieldByName('KIJELOLOKELT').AsString),
+            'szamla_kezd='+StrDate(SZURES.FieldByName('SZAMLAKEZDET').AsString),
+            'szerz_datum='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+            'szerz_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+            'szerz_meddig='+vegdat,
+            'szerz_leiras='+SZURES.FieldByName('MEGJEGYZES').AsString,
+            'berlo_id='+BERLO_ID,
+            'jurta_kod='+SZURES.FieldByName('SORSZAM').AsString
+          ],false);
+        except
+            m.Lines.Add('Hibás dátum a '+SZURES.FieldByName('CIM').AsString+' lakás szerzõdés rögzítésénél');
+        end;
         Beszuras('szerzodes_kapocs',[
           'bszerz_id='+SZE_ID,
           'lakas_id='+LAK_ID
@@ -2046,7 +2203,7 @@ begin
           LISTA.Active:=True;
           if LISTA.RecordCount=0 then
           begin
-            m.Lines.Add('Nincs a TIR adatbázisban a '+ADOQuery1.FieldByName('DIJKOD').AsString+' díjelem nem található!');
+            m.Lines.Add('JURTA: '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR adatbázisban a '+ADOQuery1.FieldByName('DIJKOD').AsString+' díjelem nem található!');
             SZURES.Next;
             Continue;
           end
@@ -2056,109 +2213,46 @@ begin
             se:=LISTA.FieldByName('szdt_id').AsString;
             ea:=LISTA.FieldByName('szde_egysegar').AsString;
           end;
-          //Áfakulcs keresés
-          LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery3.FieldByName('afakulcs').AsString;
-          LISTA.Active:=True;
-          if LISTA.RecordCount=0 then
-          begin
-            m.Lines.Add('Nincs a TIR adatbázisban a '+ADOQuery3.FieldByName('afakulcs').AsString+' értékû ÁFA kulcs!');
-            SZURES.Next;
-            Continue;
-          end
-          else
-            af:=LISTA.FieldByName('afa_id').AsString;
-          Beszuras('berleti_szerzodes_tetel',[
-            'bszerz_id='+SZE_ID,
-            'afa_id='+af,
-            'me_id='+me,
-            'szdt_id='+se,
+          try
+            Beszuras('berleti_szerzodes_tetel',[
+              'bszerz_id='+SZE_ID,
+              'afa_id=7',
+              'me_id='+me,
+              'szdt_id='+se,
 //              'szt_havidij=',
-            'szt_menny=1',
-            'szt_egysegar='+ea,
-            'szt_netto='+ADOQuery3.FieldByName('HAVIDIJ').AsString,
-            'szt_afa='+ADOQuery3.FieldByName('AFA').AsString,
-            'szt_brutto='+ADOQuery3.FieldByName('BRUTTO').AsString,
-            'szt_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-            'szt_meddig='+StrDate(ADOQuery2.FieldByName('veg').AsString)
-          ]);
+              'szt_menny=1',
+//              'szt_egysegar='+ea,
+              'szt_egysegar='+ADOQuery3.FieldByName('HAVIDIJ').AsString,
+              'szt_netto='+ADOQuery3.FieldByName('HAVIDIJ').AsString,
+              'szt_afa='+ADOQuery3.FieldByName('AFA').AsString,
+              'szt_brutto='+ADOQuery3.FieldByName('BRUTTO').AsString,
+              'szt_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+              'szt_meddig='+vegdat
+            ]);
+        except
+            m.Lines.Add('Hibás adat a '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') lakás szerzõdés tétel rögzítésénél');
+        end;
           ADOQuery3.Next;
         end;
-        //Albérlõk kezelése
-        if StrDate(SZURES.FieldByName('AVEGE').AsString)<>'' then
-        begin
-          if SZURES.FieldByName('AVEGE').AsDateTime>date then
-          begin
-            //Albérlõ keresése név alapján a TIR szervezetek között
-            LISTA.SQL.Text:='Select szervezet_id From szervezet Where szervezet_nev='+IDCHAR+SZURES.FieldByName('ALBERLO').AsString+IDCHAR;
-            LISTA.Active:=True;
-            if LISTA.RecordCount=0 then
-               SZER_ID:=Beszuras('szervezet',[
-                'szervezet_nev='+SZURES.FieldByName('ALBERLO').AsString,
-                'szervezet_kezdete='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-                'szervezet_vege='+StrDate(MAXDAT)
-               ])
-            else
-              SZER_ID:=LISTA.FieldByName('szervezet_id').AsString;
-            BERLO_ID:=Beszuras('berlok',[
-              'szemely_id='+SZEM_ID,
-              'szervezet_id='+SZER_ID
-            ]);
-            BKAP_ID:=Beszuras('berlo_kapcsolat',[
-              'lakas_id='+LAK_ID,
-              'berlo_id='+BERLO_ID,
-              'berlesjog_id=5',
-              'bstatusz_id=1',
-              'berles_kezdet_datuma='+StrDate(SZURES.FieldByName('JOGCIMKEZDET').AsString),
-              'berles_vege_datuma='+StrDate(SZURES.FieldByName('AVEGE').AsString),
-              'hasznalt_terulet='+SZURES.FieldByName('ATERULET').AsString
-            ]);
-          end
-          else
-            //Ha lejárt az albérlet, akkor mint eseményt rögzítjük
-            Beszuras('szerzodes_esemeny',[
-              'bszerz_id='+SZE_ID,
-              'felh_id=0',
-              'sze_datum='+StrDate(SZURES.FieldByName('AVEGE').AsString),
-              'sze_leiras='+'Albérlõ: '+SZURES.FieldByName('ALBERLO').AsString+' - '+
-                SZURES.FieldByName('ATELEPHELY').AsString+' - terület: '+
-                SZURES.FieldByName('ATERULET').AsString
-            ],false);
-        end;
         //Szerzõdés események kezelée
-        if SZURES.FieldByName('FELTETEL').AsString<>'' then
-          Beszuras('szerzodes_esemeny',[
-            'bszerz_id='+SZE_ID,
-            'felh_id=0',
-            'sze_datum='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-            'sze_leiras='+SZURES.FieldByName('FELTETEL').AsString
-          ],false);
         if SZURES.FieldByName('VALTOZASOKA').AsString<>'' then
+        try
           Beszuras('szerzodes_esemeny',[
             'bszerz_id='+SZE_ID,
             'felh_id=0',
             'sze_datum='+StrDate(SZURES.FieldByName('VALTOZASKELT').AsString),
             'sze_leiras='+SZURES.FieldByName('VALTOZASOKA').AsString
           ],false);
-        if SZURES.FieldByName('RESZLETFIZETES').AsString='1' then
-          Beszuras('szerzodes_esemeny',[
-            'bszerz_id='+SZE_ID,
-            'felh_id=0',
-            'sze_datum='+StrDate(SZURES.FieldByName('RESZLETKEZDET').AsString),
-            'sze_leiras='+'Részletfizetés!'
-          ],false);
-        if SZURES.FieldByName('PERTIPUS').AsString='1' then
-          Beszuras('szerzodes_esemeny',[
-            'bszerz_id='+SZE_ID,
-            'felh_id=0',
-            'sze_datum='+StrDate(SZURES.FieldByName('PERKEZDET').AsString),
-            'sze_leiras='+SZURES.FieldByName('PERNEV').AsString
-          ],false);
+        except
+            m.Lines.Add('Hibás adat a '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') lakás szerzõdés esemény rögzítésénél');
+        end;
         //
       end;
       //Szerzõdés változások
       ADOQuery1.Next;
       while not ADOQuery1.Eof do
       begin
+        try
         Beszuras('berleti_szerzvalt',[
           'bszerz_id='+SZE_ID,
           'valtozas_szama='+ADOQuery1.FieldByName('VALTOZAT').AsString,
@@ -2168,7 +2262,10 @@ begin
             'jogcím: '+ADOQuery1.FieldByName('JOGCIM').AsString+' - '+
             'ok: '+ADOQuery1.FieldByName('VALTOZASOKA').AsString+' - '+
             'megjegyzés: '+ADOQuery1.FieldByName('MEGJEGYZES').AsString
-        ],false);
+        ]);
+        except
+            m.Lines.Add('Hibás adat a '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') lakás szerzõdés változás rögzítésénél');
+        end;
         ADOQuery1.Next;
       end;
     end;
@@ -2176,16 +2273,21 @@ begin
   end;
 
   //A lakbér beírás szerzõdés tételként a dbo-Lakasok táblából
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_lakás_szerzõdés.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
 procedure Tf_AdatMigracio.csarnokszerzodesClick(Sender: TObject);
 var sza,bj,df,bs,de,szt: Integer;
-    af,me,se,ea: String;
+    af,me,se,ea,kezdat,vegdat: String;
 begin
   inherited;
   //Csarnok szerzõdések
   m.Lines.Add('Csarnok szerzõdések átvétele ______________________________');
-  SZURES.SQL.Text:='Select * From JurtaTV_teszt.dbo.Csszerzodes Where AKTIV=1';
+  SZURES.SQL.Text:=
+    'Select * From JurtaTV_teszt.dbo.Csszerzodes Where AKTIV=1'+
+    'and TIPUS='+IDCHAR+'Új kötés'+IDCHAR;
   SZURES.Active:=True;
   while not SZURES.Eof do
   begin
@@ -2196,7 +2298,7 @@ begin
     LISTA.Active:=True;
     if LISTA.RecordCount=0 then
     begin
-      m.Lines.Add('Nincs a TIR bérlemény adatbázisban a '+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR+' JURTA kód értéke!');
+      m.Lines.Add('Nincs a TIR bérlemény adatbázisban a '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') JURTA értéke!');
       SZURES.Next;
       Continue;
     end
@@ -2215,25 +2317,36 @@ begin
         Continue;
       end;
       //Szerzõdés és hivatkozott szerzõdés, amibõl több is lehet, elsõ az aktív
-      ADOQuery1.SQL.Text:=
-        'Select * From JurtaTV_teszt.dbo.Csszerzodes Where '+
-        '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
-        ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+') '+
-        'Order By AKTIV desc, VALTOZAT';
+      if SZURES.FieldByName('KAPCSOLT').AsString<>'' then
+        ADOQuery1.SQL.Text:=
+          'Select * From JurtaTV_teszt.dbo.Csszerzodes Where '+
+          '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
+          ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+') '+
+          'Order By AKTIV desc, VALTOZAT'
+          else
+        ADOQuery1.SQL.Text:=
+            'Select * From JurtaTV_teszt.dbo.Csszerzodes Where '+
+           'SORSZAM='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery1.Active:=True;
       //Szerzõdés dátumai
-      ADOQuery2.SQL.Text:=
-        'Select MIN(jogcimkezdet) as kezd, MAX(jogcimveg) as veg '+
-        'From JurtaTV_teszt.dbo.Csszerzodes Where '+
-        '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
-        ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+')';
+      if SZURES.FieldByName('KAPCSOLT').AsString<>'' then
+        ADOQuery2.SQL.Text:=
+          'Select MIN(jogcimkezdet) as kezd, MAX(jogcimveg) as veg '+
+          'From JurtaTV_teszt.dbo.Csszerzodes Where '+
+          '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
+          ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+')'
+      else
+        ADOQuery2.SQL.Text:=
+          'Select (jogcimkezdet) as kezd, (jogcimveg) as veg '+
+          'From JurtaTV_teszt.dbo.Csszerzodes Where '+
+          'SORSZAM='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery2.Active:=True;
       //Bérlõ keresése a TIR-ben
       LISTA.SQL.Text:='Select szervezet_id From szervezet Where JURTA_KOD='+IDCHAR+ADOQuery1.FieldByName('BERLOKOD').AsString+IDCHAR;
       LISTA.Active:=True;
       if LISTA.RecordCount=0 then
       begin
-        m.Lines.Add('Nincs a TIR szervezet adatbázisban a '+SZURES.FieldByName('BERLOKOD').AsString+' JURTA bérlõkód érték!');
+        m.Lines.Add(SZURES.FieldByName('CIM').AsString+' - nincs a TIR szervezet adatbázisban a '+SZURES.FieldByName('BERLOKOD').AsString+' JURTA bérlõkód érték!');
         SZURES.Next;
         Continue;
       end
@@ -2254,9 +2367,10 @@ begin
           ADOQuery3.Next;
         end;
         //Végig menni a szerzõdéseken, az elsõ lesz egy új szerzõdés a többi változás
-        //Eredeti szerzõdés
-        if ADOQuery1.FieldByName('VALTOZAT').AsInteger=0 then
+        //Aktuális szerzõdés
+//        if ADOQuery1.FieldByName('VALTOZAT').AsInteger=0 then
         begin
+          if StrDate(ADOQuery2.FieldByName('veg').AsString)='' then vegdat:='21001231';
           if ADOQuery2.FieldByName('veg').AsDateTime<date then sza:=6 else sza:=2;
           if ADOQuery2.FieldByName('veg').AsDateTime<date then bs:=3 else bs:=1;
           case ADOQuery1.FieldByName('JOGCIMKOD').AsInteger of
@@ -2265,7 +2379,7 @@ begin
             2: bj:=9;
             3: bj:=14;
           end;
-          case ADOQuery1.FieldByName('SZERZTIP').AsInteger of
+          case ADOQuery1.FieldByName('SZERZTIPUS').AsInteger of
             0: szt:=23;
             1: szt:=24;
             2: szt:=25;
@@ -2277,11 +2391,12 @@ begin
             'berlesjog_id='+IntToStr(bj),
             'bstatusz_id='+IntToStr(bs),
             'berl_id='+BERL_ID,
-            'berles_kezdet_datuma='+ADOQuery2.FieldByName('kezd').AsString,
-            'berles_vege_datuma='+ADOQuery2.FieldByName('veg').AsString
+            'berles_kezdet_datuma='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+            'berles_vege_datuma='+vegdat
           ]);
           SZE_ID:=Beszuras('berleti_szerzodes',[
             'szi_id=2',
+            'szv_id=5',
             'berlesjog_id='+IntToStr(bj),        //bérlésjog a jogcímbõl
             'sza_id='+IntToStr(sza),             //szerzõdés állapota
             'bt_id=3',                           //bérlemény típus = csarnok
@@ -2290,19 +2405,13 @@ begin
             'szt_id='+IntToStr(szt),             //szerzõdés típus
             'szerz_ev='+LeftStr(ADOQuery2.FieldByName('veg').AsString,4),
             'szerz_szam=0',
-            'szerz_ter='+Valos(FloatToStr(SZURES.FieldByName('TERULET').AsFloat)),
             'bado_szama='+SZURES.FieldByName('HATAROZATSZAM').AsString,
             'bado_datuma='+StrDate(SZURES.FieldByName('HATAROZATKELT').AsString),
             'berles_celja='+SZURES.FieldByName('CEL').AsString,
-            'kiut_szama='+SZURES.FieldByName('KIUTALOSZAM').AsString,
-            'kiut_datuma='+StrDate(SZURES.FieldByName('KIUTALOKELT').AsString),
             'szerz_datum='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
             'szerz_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-            'szerz_meddig='+StrDate(ADOQuery2.FieldByName('veg').AsString),
+            'szerz_meddig='+vegdat,
             'szerz_ovadek='+SZURES.FieldByName('OVADEK').AsString,
-            'szerz_emeles='+SZURES.FieldByName('EMELESTILTAS').AsString,
-            'szerz_automata='+SZURES.FieldByName('AUTOEMELES').AsString,
-            'szerz_emelesszaz='+SZURES.FieldByName('emeles').AsString,
             'szerz_leiras='+SZURES.FieldByName('MEGJEGYZES').AsString,
             'berlo_id='+BERLO_ID,
             'jurta_kod='+SZURES.FieldByName('SORSZAM').AsString
@@ -2349,29 +2458,34 @@ begin
               se:=LISTA.FieldByName('szdt_id').AsString;
               ea:=LISTA.FieldByName('szde_egysegar').AsString;
             end;
-            //Áfakulcs keresés
-            LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery3.FieldByName('afakulcs').AsString;
-            LISTA.Active:=True;
-            if LISTA.RecordCount=0 then
-            begin
-              m.Lines.Add('Nincs a TIR adatbázisban a '+ADOQuery3.FieldByName('afakulcs').AsString+' értékû ÁFA kulcs!');
-              SZURES.Next;
-              Continue;
-            end
+            if ADOQuery3.FieldByName('afakulcs').AsString='TAM' then af:='8'
             else
-              af:=LISTA.FieldByName('afa_id').AsString;
+            begin
+              //Áfakulcs keresés
+              LISTA.SQL.Text:='Select afa_id From afa Where afa_szazalek='+ADOQuery3.FieldByName('afakulcs').AsString;
+              LISTA.Active:=True;
+              if LISTA.RecordCount=0 then
+              begin
+                m.Lines.Add('Nincs a TIR adatbázisban a '+ADOQuery3.FieldByName('afakulcs').AsString+' értékû ÁFA kulcs!');
+                SZURES.Next;
+                Continue;
+              end
+              else
+                af:=LISTA.FieldByName('afa_id').AsString;
+            end;
             Beszuras('berleti_szerzodes_tetel',[
               'bszerz_id='+SZE_ID,
               'afa_id='+af,
               'me_id='+me,
               'szdt_id='+se,
-              'szt_menny='+Valos(ADOQuery3.FieldByName('HAVIDIJ').AsString),
-              'szt_egysegar='+ea,
+              'szt_menny=1',
+//              'szt_egysegar='+ea,
+              'szt_egysegar='+ADOQuery3.FieldByName('HAVIDIJ').AsString,
               'szt_netto='+ADOQuery3.FieldByName('HAVIDIJ').AsString,
               'szt_afa='+ADOQuery3.FieldByName('AFA').AsString,
               'szt_brutto='+ADOQuery3.FieldByName('BRUTTO').AsString,
               'szt_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-              'szt_meddig='+StrDate(ADOQuery2.FieldByName('veg').AsString)
+              'szt_meddig='+vegdat
             ]);
             ADOQuery3.Next;
           end;
@@ -2379,7 +2493,7 @@ begin
             Beszuras('szerzodes_esemeny',[
               'bszerz_id='+SZE_ID,
               'felh_id=0',
-              'sze_datum='+StrDate(SZURES.FieldByName('VALTOZASKELT').AsString),
+              'sze_datum='+StrDate(SZURES.FieldByName('SZERZDATUM').AsString),
               'sze_leiras='+SZURES.FieldByName('VALTOZASOKA').AsString
             ],false);
           //
@@ -2395,14 +2509,17 @@ begin
             'valtozas_oka='+ADOQuery1.FieldByName('SORSZAM').AsString+' - '+
               'típus: '+ADOQuery1.FieldByName('TIPUS').AsString+' - '+
               'ok: '+ADOQuery1.FieldByName('VALTOZASOKA').AsString+' - '+
-              'megjegyzés: '+ADOQuery1.FieldByName('MEGJEGYZES').AsString
-          ],false);
+              'megjegyzés: '+LeftStr(ADOQuery1.FieldByName('MEGJEGYZES').AsString,500)
+          ]);
           ADOQuery1.Next;
         end;
       end;
     end;
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_csarnok_szerzõdés.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
 procedure Tf_AdatMigracio.bb_hibaClick(Sender: TObject);
@@ -2426,6 +2543,35 @@ begin
   FreeAndNil(SD);
 end;
 
+procedure Tf_AdatMigracio.bb_keresClick(Sender: TObject);
+begin
+  bb_szemely.SetFocus;
+  bb_szemelyClick(Self);
+  szervezet.SetFocus;
+  szervezetClick(Self);
+  csarnokberlo.SetFocus;
+  csarnokberloClick(Self);
+  bb_lakasok.SetFocus;
+  bb_lakasokClick(Self);
+  helyisegadat.SetFocus;
+  helyisegadatClick(Self);
+  bb_lakasszerz.SetFocus;
+  bb_lakasszerzClick(Self);
+  helyisegszerz.SetFocus;
+  helyisegszerzClick(Self);
+  csarnokszerzodes.SetFocus;
+  csarnokszerzodesClick(Self);
+  lakasszamlak.SetFocus;
+  lakasszamlakClick(Self);
+  helyisegszamla.SetFocus;
+  helyisegszamlaClick(Self);
+  lakasvefiz.SetFocus;
+  lakasvefizClick(Self);
+  bb_helyisegbefizetes.SetFocus;
+  bb_helyisegbefizetesClick(Self);
+  Uzenet('Kész!');
+end;
+
 procedure Tf_AdatMigracio.bb_lakasokClick(Sender: TObject);
 var bf, es, r, bj, bs: Integer;
 begin
@@ -2443,28 +2589,22 @@ begin
       IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
     LISTA.Active:=True;
     if LISTA.RecordCount>0 then
-       m.Lines.Add('Lakás bérlemény már létezik a TIR-ben ('+SZURES.FieldByName('KOD').AsString+')');
-    //HRSZ
-    LISTA.SQL.Text:='Select x.lakas_id, x.lakas_osszes_terulete, '+
-    '(Select y.helyrajziszam From helyrajzi_szamok y Where y.hrsz_id=x.hrsz_id) as hrsz '+
-    'From L_LAKAS x Where x.JURTA_KOD='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
-    LISTA.Active:=True;
-    if LISTA.RecordCount>0 then
     begin
+      //Terület
+      LISTA.SQL.Text:='Select x.lakas_id, x.lakas_osszes_terulete '+
+      'From L_LAKAS x Where x.JURTA_KOD='+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR;
+      LISTA.Active:=True;
       LAK_ID:=LISTA.FieldByName('lakas_id').AsString;
-      if LISTA.FieldByName('hrsz').AsString<>SZURES.FieldByName('hrsz').AsString+'/'+SZURES.FieldByName('albetet').AsString then
-         m.Lines.Add('- hrsz hiba: '+SZURES.FieldByName('KOD').AsString+' ('+SZURES.FieldByName('hrsz').AsString+'/'+SZURES.FieldByName('albetet').AsString+') - '+
-         LISTA.FieldByName('lakas_id').AsString+' ('+LISTA.FieldByName('hrsz').AsString+')');
-      //terület
       if LISTA.FieldByName('lakas_osszes_terulete').AsString<>SZURES.FieldByName('alapterulet').AsString then
-         m.Lines.Add('- terület hiba: '+SZURES.FieldByName('KOD').AsString+' ('+SZURES.FieldByName('alapterulet').AsString+') - '+
+         m.Lines.Add('- terület hiba: JURTA - '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('alapterulet').AsString+'); TIR '+
          LISTA.FieldByName('lakas_id').AsString+' ('+LISTA.FieldByName('lakas_osszes_terulete').AsString+')');
       if LISTA.RecordCount>1 then
       begin
-         m.Lines.Add('- több JURTA kód: '+SZURES.FieldByName('KOD').AsString);
+         m.Lines.Add('- több JURTA kód: '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+')');
          SZURES.Next;
          Continue;
       end;
+      //Esetleg a komfortfokozat átkódólása (a dbo.Lakasok.KONFOTKOD vagy KONFOTKODS
        Modositas('L_LAKAS',[
         'SZOBA_SZAM='+SZURES.FieldByName('SZOBA').AsString,
         'FELSZOBA_SZAM='+SZURES.FieldByName('FELSZOBA').AsString,
@@ -2554,19 +2694,24 @@ begin
       end;
     end
     else
-      m.Lines.Add('A lakás nem szerepel a TIR rendszerben. ('+SZURES.FieldByName('KOD').AsString+')');
+      m.Lines.Add('A '+SZURES.FieldByName('CIM').AsString+' lakás nem szerepel a TIR rendszerben. ('+SZURES.FieldByName('KOD').AsString+')');
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_lakások.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
 procedure Tf_AdatMigracio.helyisegszerzClick(Sender: TObject);
 var sza,bj,df,bs,de: Integer;
-    af,me,se,ea: String;
+    af,me,se,ea,vegdat: String;
 begin
   inherited;
   //Helyiség szerzõdések
   m.Lines.Add('Helyiség szerzõdések átvétele ______________________________');
-  SZURES.SQL.Text:='Select * From JurtaTV_teszt.dbo.Nszerzodes Where AKTIV=1';
+  SZURES.SQL.Text:=
+    'Select * From JurtaTV_teszt.dbo.Nszerzodes Where AKTIV=1'+
+    'and TIPUS='+IDCHAR+'Új kötés'+IDCHAR;
   SZURES.Active:=True;
   while not SZURES.Eof do
   begin
@@ -2577,7 +2722,7 @@ begin
     LISTA.Active:=True;
     if LISTA.RecordCount=0 then
     begin
-      m.Lines.Add('Nincs a TIR helyiség adatbázisban a '+IDCHAR+SZURES.FieldByName('KOD').AsString+IDCHAR+' JURTA kód értéke!');
+      m.Lines.Add('- nincs a TIR helyiség adatbázisban a '+SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') JURTA értéke!');
       SZURES.Next;
       Continue;
     end
@@ -2596,18 +2741,29 @@ begin
         Continue;
       end;
       //Szerzõdés és hivatkozott szerzõdés, amibõl több is lehet
-      ADOQuery1.SQL.Text:=
-        'Select * From JurtaTV_teszt.dbo.Nszerzodes Where '+
-        '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
-        ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+') '+
-        'Order By AKTIV desc, VALTOZAT';
+      if SZURES.FieldByName('KAPCSOLT').AsString<>'' then
+        ADOQuery1.SQL.Text:=
+          'Select * From JurtaTV_teszt.dbo.Nszerzodes Where '+
+          '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
+          ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+') '+
+          'Order By AKTIV desc, VALTOZAT'
+          else
+        ADOQuery1.SQL.Text:=
+            'Select * From JurtaTV_teszt.dbo.Nszerzodes Where '+
+           'SORSZAM='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery1.Active:=True;
       //Szerzõdés dátumai
-      ADOQuery2.SQL.Text:=
-        'Select MIN(jogcimkezdet) as kezd, MAX(jogcimveg) as veg '+
-        'From JurtaTV_teszt.dbo.Nszerzodes Where '+
-        '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
-        ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+')';
+      if SZURES.FieldByName('KAPCSOLT').AsString<>'' then
+        ADOQuery2.SQL.Text:=
+          'Select MIN(jogcimkezdet) as kezd, MAX(jogcimveg) as veg '+
+          'From JurtaTV_teszt.dbo.Nszerzodes Where '+
+          '(KAPCSOLT='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+
+          ') OR (SORSZAM='+IDCHAR+SZURES.FieldByName('KAPCSOLT').AsString+IDCHAR+')'
+      else
+        ADOQuery2.SQL.Text:=
+          'Select (jogcimkezdet) as kezd, (jogcimveg) as veg '+
+          'From JurtaTV_teszt.dbo.Nszerzodes Where '+
+          'SORSZAM='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
       ADOQuery2.Active:=True;
       if ADOQuery1.FieldByName('BERLOKOD').AsString<>'' then
       begin
@@ -2616,7 +2772,7 @@ begin
         LISTA.Active:=True;
         if LISTA.RecordCount=0 then
         begin
-          m.Lines.Add('Nincs a TIR szervezet adatbázisban a '+SZURES.FieldByName('BERLOKOD').AsString+' JURTA bérlõkód érték!');
+          m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - nincs a TIR szervezet adatbázisban a '+SZURES.FieldByName('BERLOKOD').AsString+' JURTA bérlõkód érték!');
           SZURES.Next;
           Continue;
         end
@@ -2636,22 +2792,31 @@ begin
             ]);
             ADOQuery3.Next;
           end;
-          BKAP_ID:=Beszuras('BERLO_KAPCSOLAT',[
-            'berlo_id='+BERLO_ID,
-            'berlesjog_id='+IntToStr(bj),
-            'bstatusz_id='+IntToStr(bs),
-            'nem_lakas_id='+NLAK_ID,
-            'berles_kezdet_datuma='+ADOQuery2.FieldByName('kezd').AsString,
-            'berles_vege_datuma='+ADOQuery2.FieldByName('veg').AsString
-          ]);
+          try
+            BKAP_ID:=Beszuras('BERLO_KAPCSOLAT',[
+              'berlo_id='+BERLO_ID,
+              'berlesjog_id='+IntToStr(bj),
+              'bstatusz_id='+IntToStr(bs),
+              'nem_lakas_id='+NLAK_ID,
+              'berles_kezdet_datuma='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+              'berles_vege_datuma='+StrDate(ADOQuery2.FieldByName('veg').AsString)
+            ]);
+          except
+            m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - hibás adatrögzítés a helyiség szerzõdés bérlõ kapcsolatában ('+SZURES.FieldByName('SORSZAM').AsString+')');
+          end;
         end;
       end;
       //Végig menni a szerzõdéseken, az elsõ lesz egy új szerzõdés a többi változás
       //Eredeti szerzõdés
       if ADOQuery1.FieldByName('VALTOZAT').AsInteger=0 then
       begin
-        if ADOQuery2.FieldByName('veg').AsDateTime<date then sza:=6 else sza:=2;
-        if ADOQuery2.FieldByName('veg').AsDateTime<date then bs:=3 else bs:=1;
+        if StrDate(ADOQuery2.FieldByName('veg').AsString)='' then vegdat:='21001231';
+        try
+          if ADOQuery2.FieldByName('veg').AsDateTime<date then sza:=6 else sza:=2;
+          if ADOQuery2.FieldByName('veg').AsDateTime<date then bs:=3 else bs:=1;
+        except
+            m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - hibás dátum adat a helyiség szerzõdésben ('+SZURES.FieldByName('SORSZAM').AsString+')');
+        end;
         case ADOQuery1.FieldByName('JOGCIMKOD').AsInteger of
           1: bj:=1;
           2: bj:=3;
@@ -2660,36 +2825,41 @@ begin
           7: bj:=13;
         end;
         if ADOQuery1.FieldByName('GYAKORISAG').AsInteger=1 then df:=5 else df:=2;
-        SZE_ID:=Beszuras('berleti_szerzodes',[
-          'szi_id=2',
-          'berlesjog_id='+IntToStr(bj),        //bérlésjog a jogcímbõl
-          'sza_id='+IntToStr(sza),             //szerzõdés állapota
-          'bt_id=2',                           //bérlemény típus = helyiség
-          'dsz_id=2',                          //díjszámítás módja = piaci
-          'df_id='+IntToStr(df),               //díjfizetés = havi
-          'szerz_ev='+LeftStr(ADOQuery2.FieldByName('veg').AsString,4),
-          'szerz_szam=0',
-          'szerz_ter='+Valos(FloatToStr(SZURES.FieldByName('TERULET').AsFloat)),
-          'bado_szama='+SZURES.FieldByName('HATAROZATSZAM').AsString,
-          'bado_datuma='+StrDate(SZURES.FieldByName('HATAROZATKELT').AsString),
-          'berles_celja='+SZURES.FieldByName('CEL').AsString,
-          'kiut_szama='+SZURES.FieldByName('KIUTALOSZAM').AsString,
-          'kiut_datuma='+StrDate(SZURES.FieldByName('KIUTALOKELT').AsString),
-          'szerz_datum='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-          'szerz_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-          'szerz_meddig='+StrDate(ADOQuery2.FieldByName('veg').AsString),
-          'szerz_ovadek='+SZURES.FieldByName('OVADEK').AsString,
-          'szerz_emeles='+SZURES.FieldByName('EMELESTILTAS').AsString,
-          'szerz_automata='+SZURES.FieldByName('AUTOEMELES').AsString,
-          'szerz_emelesszaz='+SZURES.FieldByName('emeles').AsString,
-          'szerz_leiras='+SZURES.FieldByName('MEGJEGYZES').AsString,
-          'berlo_id='+BERLO_ID,
-          'jurta_kod='+SZURES.FieldByName('SORSZAM').AsString
-        ],false);
-        Beszuras('szerzodes_kapocs',[
-          'bszerz_id='+SZE_ID,
-          'nem_lakas_id='+NLAK_ID
-        ]);
+        try
+          SZE_ID:=Beszuras('berleti_szerzodes',[
+            'szi_id=2',
+            'szv_id=3',
+            'berlesjog_id='+IntToStr(bj),        //bérlésjog a jogcímbõl
+            'sza_id='+IntToStr(sza),             //szerzõdés állapota
+            'bt_id=2',                           //bérlemény típus = helyiség
+            'dsz_id=2',                          //díjszámítás módja = piaci
+            'df_id='+IntToStr(df),               //díjfizetés = havi
+            'szerz_ev='+LeftStr(ADOQuery2.FieldByName('veg').AsString,4),
+            'szerz_szam=0',
+            'szerz_ter='+Valos(FloatToStr(SZURES.FieldByName('TERULET').AsFloat)),
+            'bado_szama='+SZURES.FieldByName('HATAROZATSZAM').AsString,
+            'bado_datuma='+StrDate(SZURES.FieldByName('HATAROZATKELT').AsString),
+            'berles_celja='+SZURES.FieldByName('CEL').AsString,
+            'kiut_szama='+SZURES.FieldByName('KIUTALOSZAM').AsString,
+            'kiut_datuma='+StrDate(SZURES.FieldByName('KIUTALOKELT').AsString),
+            'szerz_datum='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+            'szerz_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+            'szerz_meddig='+vegdat,
+            'szerz_ovadek='+SZURES.FieldByName('OVADEK').AsString,
+            'szerz_emeles='+SZURES.FieldByName('EMELESTILTAS').AsString,
+            'szerz_automata='+SZURES.FieldByName('AUTOEMELES').AsString,
+            'szerz_emelesszaz='+SZURES.FieldByName('emeles').AsString,
+            'szerz_leiras='+SZURES.FieldByName('MEGJEGYZES').AsString,
+            'berlo_id='+BERLO_ID,
+            'jurta_kod='+SZURES.FieldByName('SORSZAM').AsString
+          ],false);
+          Beszuras('szerzodes_kapocs',[
+            'bszerz_id='+SZE_ID,
+            'nem_lakas_id='+NLAK_ID
+          ]);
+        except
+            m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - hibás adat a helyiség szerzõdésben ('+SZURES.FieldByName('SORSZAM').AsString+')');
+        end;
         //Bérleti szerzõdés tételek
         ADOQuery3.SQL.Text:='Select * From JurtaTV_teszt.dbo.Nszerzdij Where sorszam='+IDCHAR+SZURES.FieldByName('SORSZAM').AsString+IDCHAR;
         ADOQuery3.Active:=True;
@@ -2736,20 +2906,25 @@ begin
           end
           else
             af:=LISTA.FieldByName('afa_id').AsString;
-          Beszuras('berleti_szerzodes_tetel',[
-            'bszerz_id='+SZE_ID,
-            'afa_id='+af,
-            'me_id='+me,
-            'szdt_id='+se,
+          try
+            Beszuras('berleti_szerzodes_tetel',[
+              'bszerz_id='+SZE_ID,
+              'afa_id='+af,
+              'me_id='+me,
+              'szdt_id='+se,
 //              'szt_havidij=',
-            'szt_menny=1',
-            'szt_egysegar='+ea,
-            'szt_netto='+ADOQuery3.FieldByName('HAVIDIJ').AsString,
-            'szt_afa='+ADOQuery3.FieldByName('AFA').AsString,
-            'szt_brutto='+ADOQuery3.FieldByName('BRUTTO').AsString,
-            'szt_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
-            'szt_meddig='+StrDate(ADOQuery2.FieldByName('veg').AsString)
-          ]);
+              'szt_menny=1',
+//              'szt_egysegar='+ea,
+              'szt_egysegar='+ADOQuery3.FieldByName('HAVIDIJ').AsString,
+              'szt_netto='+ADOQuery3.FieldByName('HAVIDIJ').AsString,
+              'szt_afa='+ADOQuery3.FieldByName('AFA').AsString,
+              'szt_brutto='+ADOQuery3.FieldByName('BRUTTO').AsString,
+              'szt_mettol='+StrDate(ADOQuery2.FieldByName('kezd').AsString),
+              'szt_meddig='+StrDate(ADOQuery2.FieldByName('veg').AsString)
+            ]);
+        except
+            m.Lines.Add(SZURES.FieldByName('CIM').AsString+' ('+SZURES.FieldByName('KOD').AsString+') - hibás adat a helyiség szerzõdés tételében ('+SZURES.FieldByName('SORSZAM').AsString+')');
+        end;
           ADOQuery3.Next;
         end;
         //Albérlõk kezelése
@@ -2843,6 +3018,9 @@ begin
     end;
     SZURES.Next;
   end;
+  m.Lines.SaveToFile(StrDate(SzerverDat(1))+'_helyiség_szerzõdés.txt');
+  sleep(500);
+  m.Lines.Clear;
 end;
 
 end.
