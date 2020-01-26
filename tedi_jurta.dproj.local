@@ -62,7 +62,7 @@
     <Transaction>1899.12.30 00:00:00.000.076,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_LakasKeres_unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.895,C:\TEDI_JURTA\f_SzamlaKeres_Unit.pas=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.756,C:\TEDI_JURTA\f_ReszletfizetesSzures_Unit.pas=</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.272,C:\TEDI_JURTA\f_TamogatasSzures_Unit.pas=</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.464,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_TamogatasSzures_Unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.947,C:\TEDI_JURTA\tedi.dproj=C:\TEDI_JURTA\tedi_jurta.dproj</Transaction>
     <Transaction>1899.12.30 00:00:00.000.651,C:\TEDI_JURTA\f_LakasKeres_unit.pas=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.132,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BerloKeres_Unit\default.txvpck</Transaction>
@@ -72,24 +72,24 @@
     <Transaction>1899.12.30 00:00:00.000.485,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_Indito_Unit\default.txaPackage</Transaction>
     <Transaction>1899.12.30 00:00:00.000.433,C:\TEDI_JURTA\f_EleresAdat_Unit.pas=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.740,=C:\TEDI_JURTA\f_EleresAdat_Unit.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.969,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzemelyKeres_Unit\default.txaPackage</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.402,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\AlapAdat\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.746,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\default.txaPackage</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.348,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzervezetAdat_Unit\default.txvpck</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.969,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzemelyKeres_Unit\default.txaPackage</Transaction>
     <Transaction>1899.12.30 00:00:00.000.665,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BerloKeres_Unit\default.txaPackage</Transaction>
     <Transaction>1899.12.30 00:00:00.000.528,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzerzodesKeres_Unit\default.txaPackage</Transaction>
     <Transaction>1899.12.30 00:00:00.000.032,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzervezetAdat_Unit\default.txaPackage</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.402,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\AlapAdat\default.txvpck</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.348,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzervezetAdat_Unit\default.txvpck</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.272,C:\TEDI_JURTA\f_TamogatasSzures_Unit.pas=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.829,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BerlemenyKereses_Unit\default.txaPackage</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.464,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_TamogatasSzures_Unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.355,C:\TEDI_JURTA\f_BerlemenyKereses_Unit.pas=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.774,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\AlapAblak_unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.930,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_PenztarBefizetes_Unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.761,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_PenztarKeres_Unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.448,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzamelyAdat_Unit\default.txaPackage</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.856,=C:\Users\altmann\Documents\GitHub\TEDI_JURTA\f_BerlemenyKereses_Unit.pas</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.596,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_EleresAdat_Unit\default.txaPackage</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.055,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzamlaKeres_Unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.726,C:\TEDI_JURTA\f_PenztarBefizetes_Unit.pas=</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.596,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_EleresAdat_Unit\default.txaPackage</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.856,=C:\Users\altmann\Documents\GitHub\TEDI_JURTA\f_BerlemenyKereses_Unit.pas</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.055,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_SzamlaKeres_Unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.502,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_LakasAdat_Unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.689,C:\TEDI_JURTA\f_SzerzodesAdat_Unit.pas=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.346,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BerlemenyAdat_Unit\default.txvpck</Transaction>
@@ -112,7 +112,7 @@
     <Transaction>1899.12.30 00:00:00.000.254,C:\TEDI_JURTA\f_BefizetesAdat_Unit.pas=</Transaction>
     <Transaction>1899.12.30 00:00:00.000.022,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_BefizetesAdat_Unit\default.txvpck</Transaction>
     <Transaction>1899.12.30 00:00:00.000.556,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_CimSzerkeszto_Unit\default.txaPackage</Transaction>
-    <Transaction>1899.12.30 00:00:00.000.699,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_GridMezok_Unit\default.txaPackage</Transaction>
     <Transaction>1899.12.30 00:00:00.000.635,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\AlapFuggveny\default.txvpck</Transaction>
+    <Transaction>1899.12.30 00:00:00.000.699,=C:\TEDI_JURTA\ModelSupport_tedi_jurta\f_GridMezok_Unit\default.txaPackage</Transaction>
   </Transactions>
 </BorlandProject>
